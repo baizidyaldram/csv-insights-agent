@@ -1,3 +1,4 @@
+import streamlit as st
 import pandas as pd
 import numpy as np
 from scipy import stats
@@ -22,7 +23,7 @@ def generate_data_profile(df: pd.DataFrame) -> dict:
         "total_columns": len(df.columns),
         "memory_usage_mb": df.memory_usage(deep=True).sum() / 1024 / 1024,
         "duplicate_rows": df.duplicated().sum(),
-        "duplicate_percentage": round(df.duplicated().sum() / len(df) * 100, 2)
+        "duplicate_percentage": round(df.duplicated().sum() / len(df) * 100, 2) if len(df) > 0 else 0
     }
     
     # Numeric Columns Analysis
@@ -74,7 +75,7 @@ def generate_data_profile(df: pd.DataFrame) -> dict:
     missing_cols = missing_df[missing_df > 0]
     profile["missing_analysis"] = {
         "total_missing_cells": int(missing_df.sum()),
-        "total_missing_pct": round(missing_df.sum() / df.size * 100, 2),
+        "total_missing_pct": round(missing_df.sum() / df.size * 100, 2) if df.size > 0 else 0,
         "columns_with_missing": len(missing_cols),
         "missing_by_column": {col: {"count": int(count), "percentage": round(count / len(df) * 100, 2)} 
                               for col, count in missing_cols.items()}
@@ -87,15 +88,16 @@ def generate_data_profile(df: pd.DataFrame) -> dict:
         correlations = []
         for i in range(len(corr_matrix.columns)):
             for j in range(i + 1, len(corr_matrix.columns)):
-                correlations.append({
-                    "variable_1": corr_matrix.columns[i],
-                    "variable_2": corr_matrix.columns[j],
-                    "correlation": round(corr_matrix.iloc[i, j], 4),
-                    "strength": "Strong" if abs(corr_matrix.iloc[i, j]) >= 0.7 else "Moderate" if abs(corr_matrix.iloc[i, j]) >= 0.4 else "Weak"
-                })
+                corr_val = corr_matrix.iloc[i, j]
+                if not pd.isna(corr_val):
+                    correlations.append({
+                        "variable_1": corr_matrix.columns[i],
+                        "variable_2": corr_matrix.columns[j],
+                        "correlation": round(corr_val, 4),
+                        "strength": "Strong" if abs(corr_val) >= 0.7 else "Moderate" if abs(corr_val) >= 0.4 else "Weak"
+                    })
         correlations.sort(key=lambda x: abs(x["correlation"]), reverse=True)
         profile["correlation_analysis"] = {
-            "matrix": corr_matrix.to_dict(),
             "top_10_correlations": correlations[:10]
         }
     
@@ -113,7 +115,7 @@ def generate_data_profile(df: pd.DataFrame) -> dict:
             
             outlier_summary[col] = {
                 "outlier_count": len(outliers),
-                "outlier_percentage": round(len(outliers) / len(data) * 100, 2),
+                "outlier_percentage": round(len(outliers) / len(data) * 100, 2) if len(data) > 0 else 0,
                 "lower_bound": round(lower_bound, 4),
                 "upper_bound": round(upper_bound, 4),
                 "min_outlier": round(outliers.min(), 4) if len(outliers) > 0 else None,
@@ -122,8 +124,8 @@ def generate_data_profile(df: pd.DataFrame) -> dict:
     profile["outlier_analysis"] = outlier_summary
     
     # Data Quality Score
-    completeness_score = (1 - missing_df.sum() / df.size) * 100
-    uniqueness_score = (1 - df.duplicated().sum() / len(df)) * 100
+    completeness_score = (1 - missing_df.sum() / df.size) * 100 if df.size > 0 else 0
+    uniqueness_score = (1 - df.duplicated().sum() / len(df)) * 100 if len(df) > 0 else 0
     outlier_penalty = sum([v["outlier_percentage"] for v in outlier_summary.values()]) / len(outlier_summary) if outlier_summary else 0
     
     profile["data_quality"] = {
@@ -209,7 +211,7 @@ def display_data_profile(profile: dict):
             st.info("No significant outliers detected!")
     
     # Top Correlations
-    if profile['correlation_analysis'] and profile['correlation_analysis'].get('top_10_correlations'):
+    if profile.get('correlation_analysis') and profile['correlation_analysis'].get('top_10_correlations'):
         st.markdown("### 🔗 Top Correlations")
         corr_df = pd.DataFrame(profile['correlation_analysis']['top_10_correlations'])
         st.dataframe(corr_df, use_container_width=True)
@@ -220,7 +222,8 @@ def display_data_profile(profile: dict):
         for col, stats_dict in list(profile['categorical_stats'].items())[:5]:
             with st.expander(f"📌 {col}"):
                 st.write(f"**Unique Values:** {stats_dict['unique_values']}")
-                st.write(f"**Most Frequent:** {stats_dict['most_frequent']} ({stats_dict['most_frequent_count']} rows, {stats_dict['most_frequent_pct']}%)")
+                if stats_dict['most_frequent']:
+                    st.write(f"**Most Frequent:** {stats_dict['most_frequent']} ({stats_dict['most_frequent_count']} rows, {stats_dict['most_frequent_pct']}%)")
                 st.write(f"**Missing:** {stats_dict['missing']} ({stats_dict['missing_pct']}%)")
                 if stats_dict['top_5_categories']:
                     st.write("**Top Categories:**")
