@@ -11,6 +11,9 @@ def render():
 
     if not is_data_loaded():
         st.warning("No data loaded. Please upload a CSV on the Home page first.")
+        if st.button("← Back to Home", use_container_width=False):
+            st.session_state.current_page = "home"
+            st.rerun()
         return
 
     df = get_df()
@@ -84,9 +87,20 @@ def render():
         if charts_rendered == 0:
             st.warning("Not enough data variety to generate charts.")
         
-        # Next button
-        if st.button("➡️ Next: AI Insights", use_container_width=False):
-            st.session_state.current_page = "insights"
-            st.rerun()
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("← Back to Home", use_container_width=True):
+                st.session_state.current_page = "home"
+                st.rerun()
+        with col2:
+            if st.button("➡️ Next: AI Insights", use_container_width=True):
+                st.session_state.current_page = "insights"
+                st.rerun()
     else:
-        st.info("Click **Generate Visualizations** to auto-build charts for your dataset.")
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("← Back to Home", use_container_width=True):
+                st.session_state.current_page = "home"
+                st.rerun()
+        with col2:
+            st.info("Click **Generate Visualizations** to auto-build charts for your dataset.")
