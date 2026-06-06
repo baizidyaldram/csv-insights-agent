@@ -18,16 +18,18 @@ def render():
 
     df = get_df()
     
-    # Add Data Profiling button
-    col1, col2 = st.columns([1, 3])
-    with col1:
-        if st.button("▶ Run Statistical Analysis", use_container_width=False):
-            st.session_state.stats_done = True
-        if st.button("📊 Generate Data Profile", use_container_width=False):
+    # Tab 3: Data Profile (NEW)
+with tab3:
+    if st.session_state.get("data_profile"):
+        display_data_profile(st.session_state.data_profile)
+    else:
+        st.info("Click 'Generate Data Profile' to see comprehensive data analysis.")
+        if st.button("📊 Generate Data Profile Now", use_container_width=True):
             with st.spinner("Generating comprehensive data profile..."):
+                from utils.data_profiler import generate_data_profile
                 profile = generate_data_profile(df)
                 st.session_state.data_profile = profile
-                st.session_state.stats_done = True
+                st.rerun()
     
     if st.session_state.get("stats_done"):
         # Create tabs for different analyses
