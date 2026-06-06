@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import io  
+import io
 from utils.session import get_df, get_raw_df, update_clean_df, is_data_loaded
 
 
@@ -12,7 +12,6 @@ def render():
 
     if not is_data_loaded():
         st.warning("No data loaded.")
-        # Add back button
         if st.button("← Back to Home", use_container_width=False):
             st.session_state.current_page = "home"
             st.rerun()
@@ -29,14 +28,16 @@ def render():
         st.metric("Total Columns", df_raw.shape[1])
     with col3:
         duplicates = df_raw.duplicated().sum()
-        st.metric("Duplicate Rows", f"{duplicates:,}", delta=f"{duplicates/len(df_raw)*100:.1f}%")
+        dup_pct = duplicates/len(df_raw)*100 if len(df_raw) > 0 else 0
+        st.metric("Duplicate Rows", f"{duplicates:,}", delta=f"{dup_pct:.1f}%")
     with col4:
         missing = df_raw.isnull().sum().sum()
-        st.metric("Missing Values", f"{missing:,}", delta=f"{missing/df_raw.size*100:.1f}%")
+        missing_pct = missing/df_raw.size*100 if df_raw.size > 0 else 0
+        st.metric("Missing Values", f"{missing:,}", delta=f"{missing_pct:.1f}%")
     
     st.markdown("---")
     
-    # Cleaning options with better defaults
+    # Cleaning options
     st.markdown("### ⚙️ Cleaning Options")
     
     col1, col2 = st.columns(2)
@@ -88,7 +89,7 @@ def render():
     
     st.markdown("---")
     
-    # Advanced options (collapsible)
+    # Advanced options
     with st.expander("🔧 Advanced Options (Optional)"):
         col1, col2 = st.columns(2)
         
@@ -129,12 +130,10 @@ def render():
     
     st.markdown("---")
     
-    # Preview changes before applying
+    # Preview changes
     if st.button("🔍 Preview Changes", use_container_width=False):
         df_preview = df_raw.copy()
         changes = []
-        
-        # Simulate changes for preview
         before_rows = len(df_preview)
         
         if remove_duplicates:
@@ -160,12 +159,12 @@ def render():
         if fill_missing_numeric != "None (keep as is)":
             numeric_cols = df_preview.select_dtypes(include="number").columns
             missing_before = df_preview[numeric_cols].isnull().sum().sum()
-            changes.append(f"• Will fill {missing_before:,} missing numeric values using '{fill_missing_numeric}'")
+            changes.append(f"• Will fill {missing_before:,} missing numeric values")
         
         if fill_missing_categorical != "None (keep as is)":
             cat_cols = df_preview.select_dtypes(include="object").columns
             missing_before = df_preview[cat_cols].isnull().sum().sum()
-            changes.append(f"• Will fill {missing_before:,} missing categorical values using '{fill_missing_categorical}'")
+            changes.append(f"• Will fill {missing_before:,} missing categorical values")
         
         if changes:
             st.info("### 📋 Preview of Changes:")
@@ -175,7 +174,7 @@ def render():
         else:
             st.info("No changes will be applied with current settings")
     
-    # Run cleaning button
+    # Run cleaning
     if st.button("▶ Run Data Cleaning", use_container_width=False, type="primary"):
         df_clean = df_raw.copy()
         log = []
@@ -224,7 +223,7 @@ def render():
             missing_after = df_clean[numeric_cols].isnull().sum().sum()
             filled = missing_before - missing_after
             if filled > 0:
-                log.append(f"✅ Filled {filled:,} missing numeric values using '{fill_missing_numeric}'")
+                log.append(f"✅ Filled {filled:,} missing numeric values")
         
         # 4. Fill missing categorical values
         if fill_missing_categorical != "None (keep as is)":
@@ -247,9 +246,9 @@ def render():
             missing_after = df_clean[cat_cols].isnull().sum().sum()
             filled = missing_before - missing_after
             if filled > 0:
-                log.append(f"✅ Filled {filled:,} missing categorical values using '{fill_missing_categorical}'")
+                log.append(f"✅ Filled {filled:,} missing categorical values")
         
-        # 5. Handle outliers (if selected)
+        # 5. Handle outliers
         if handle_outliers:
             numeric_cols = df_clean.select_dtypes(include="number").columns
             outlier_count = 0
@@ -282,7 +281,7 @@ def render():
                     outlier_count += before - len(df_clean)
             
             if outlier_count > 0:
-                log.append(f"✅ Handled {outlier_count:,} outliers using '{outlier_method}'")
+                log.append(f"✅ Handled {outlier_count:,} outliers")
         
         # 6. Remove constant columns
         if remove_constant_columns:
@@ -292,7 +291,7 @@ def render():
                     constant_cols.append(col)
             if constant_cols:
                 df_clean.drop(columns=constant_cols, inplace=True)
-                log.append(f"✅ Removed {len(constant_cols)} constant columns: {', '.join(constant_cols[:5])}")
+                log.append(f"✅ Removed {len(constant_cols)} constant columns")
         
         # 7. Remove high cardinality columns
         if remove_high_cardinality:
@@ -303,7 +302,7 @@ def render():
                     high_card_cols.append(col)
             if high_card_cols:
                 df_clean.drop(columns=high_card_cols, inplace=True)
-                log.append(f"✅ Removed {len(high_card_cols)} high-cardinality columns (> {cardinality_threshold} unique values)")
+                log.append(f"✅ Removed {len(high_card_cols)} high-cardinality columns")
         
         # 8. Standardize column names
         if standardize_column_names:
@@ -359,30 +358,83 @@ def render():
         df_clean = get_df()
         st.dataframe(df_clean.head(15), use_container_width=True)
         
-        # Download cleaned data
-        csv_buffer = io.StringIO()
-        df_clean.to_csv(csv_buffer, index=False)
-        st.download_button(
-            label="⬇️ Download Cleaned CSV",
-            data=csv_buffer.getvalue(),
-            file_name="cleaned_data.csv",
-            mime="text/csv",
-        )
+        # Export Section - Multi-format
+        st.markdown("---")
+        st.markdown("### 📤 Export Cleaned Data")
         
-        col_btn1, col_btn2 = st.columns(2)
-        with col_btn1:
-            if st.button("← Back to Home", use_container_width=True):
-                st.session_state.current_page = "home"
+        # Helper function for exports
+        def export_to_csv(dataframe):
+            return dataframe.to_csv(index=False)
+        
+        def export_to_excel(dataframe):
+            output = io.BytesIO()
+            with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                dataframe.to_excel(writer, sheet_name="Cleaned_Data", index=False)
+            return output.getvalue()
+        
+        def export_to_json(dataframe):
+            return dataframe.to_json(orient="records", indent=2)
+        
+        def export_to_html(dataframe):
+            return dataframe.to_html(index=False, border=0)
+        
+        col_exp1, col_exp2, col_exp3, col_exp4 = st.columns(4)
+        
+        with col_exp1:
+            csv_data = export_to_csv(df_clean)
+            st.download_button(
+                label="📄 CSV",
+                data=csv_data,
+                file_name="cleaned_data.csv",
+                mime="text/csv",
+                use_container_width=True,
+            )
+        
+        with col_exp2:
+            excel_data = export_to_excel(df_clean)
+            st.download_button(
+                label="📊 Excel",
+                data=excel_data,
+                file_name="cleaned_data.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                use_container_width=True,
+            )
+        
+        with col_exp3:
+            json_data = export_to_json(df_clean)
+            st.download_button(
+                label="📋 JSON",
+                data=json_data,
+                file_name="cleaned_data.json",
+                mime="application/json",
+                use_container_width=True,
+            )
+        
+        with col_exp4:
+            html_data = export_to_html(df_clean)
+            st.download_button(
+                label="🌐 HTML",
+                data=html_data,
+                file_name="cleaned_data.html",
+                mime="text/html",
+                use_container_width=True,
+            )
+        
+        # Navigation buttons
+        col_nav1, col_nav2 = st.columns(2)
+        with col_nav1:
+            if st.button("← Back to Quality Check", use_container_width=True):
+                st.session_state.current_page = "quality"
                 st.rerun()
-        with col_btn2:
+        with col_nav2:
             if st.button("➡️ Next: Statistical Analysis", use_container_width=True):
                 st.session_state.current_page = "stats"
                 st.rerun()
     else:
         col_btn1, col_btn2 = st.columns(2)
         with col_btn1:
-            if st.button("← Back to Home", use_container_width=True):
-                st.session_state.current_page = "home"
+            if st.button("← Back to Quality Check", use_container_width=True):
+                st.session_state.current_page = "quality"
                 st.rerun()
         with col_btn2:
             st.info("Configure cleaning options above and click **Run Data Cleaning** to begin.")
