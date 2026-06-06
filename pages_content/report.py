@@ -7,6 +7,45 @@ import io
 import re
 
 
+def build_full_context(df: pd.DataFrame) -> str:
+    """Build comprehensive context for the report."""
+    numeric_cols = df.select_dtypes(include="number").columns.tolist()
+    cat_cols = df.select_dtypes(include="object").columns.tolist()
+
+    parts = []
+    parts.append(f"Shape: {df.shape[0]} rows × {df.shape[1]} columns")
+    parts.append(f"Columns: {', '.join(df.columns.tolist())}")
+
+    if numeric_cols:
+        desc = df[numeric_cols].describe().round(2)
+        parts.append("\nNumeric Statistics:\n" + desc.to_string())
+
+    if cat_cols:
+        parts.append("\nCategorical Columns:")
+        for col in cat_cols[:4]:
+            top = df[col].value_counts().head(3)
+            parts.append(f"  {col}: {dict(top)}")
+
+    quality_report = st.session_state.get("quality_report")
+    if quality_report:
+        parts.append(f"\nData Quality Score: {quality_report['score']}/100")
+        parts.append(f"Completeness: {quality_report['completeness']}%")
+        parts.append(f"Duplicates: {quality_report['duplicate_rows']} rows")
+
+    insights = st.session_state.get("insights_text")
+    if insights:
+        parts.append(f"\nAI Insights Summary:\n{insights[:800]}")
+
+    cleaning_report = st.session_state.get("cleaning_report")
+    if cleaning_report:
+        parts.append(f"\nCleaning Summary:")
+        parts.append(f"  - Rows before: {cleaning_report['before_shape'][0]}")
+        parts.append(f"  - Rows after: {cleaning_report['after_shape'][0]}")
+        parts.append(f"  - Rows removed: {cleaning_report['before_shape'][0] - cleaning_report['after_shape'][0]}")
+
+    return "\n".join(parts)
+
+
 def format_report_text(text: str) -> str:
     """Format report text with better HTML styling."""
     
@@ -78,7 +117,7 @@ def format_report_text(text: str) -> str:
     
     # Format bullet points
     text = re.sub(r'^[\-\*]\s+(.*?)$', r'<li style="margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);">• \1</li>', text, flags=re.MULTILINE)
-    text = re.sub(r'^[0-9]+\.\s+(.*?)$', r'<li style="margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);"><strong style="color: #f093fb;">\g<0></strong></li>', text, flags=re.MULTILINE)
+    text = re.sub(r'^[0-9]+\.\s+(.*?)$', r'<li style="margin-bottom: 0.5rem; color: rgba(255,255,255,0.9);"><strong style="color: #f093fb;">✓</strong> \1</li>', text, flags=re.MULTILINE)
     
     # Wrap consecutive list items
     text = re.sub(r'(<li.*?>.*?</li>\n?)+', r'<ul style="margin: 0.8rem 0; padding-left: 1.5rem; list-style-type: none;">\g<0></ul>', text, flags=re.DOTALL)
@@ -93,6 +132,7 @@ def format_report_text(text: str) -> str:
 
 
 def generate_markdown_report(df: pd.DataFrame, llm_report: str, file_name: str) -> str:
+    """Generate complete markdown report."""
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     numeric_cols = df.select_dtypes(include="number").columns.tolist()
     cat_cols = df.select_dtypes(include="object").columns.tolist()
@@ -121,11 +161,14 @@ def generate_markdown_report(df: pd.DataFrame, llm_report: str, file_name: str) 
 
     # Column list
     lines.append("### 📝 Column Details\n")
-    for i, col in enumerate(df.columns, 1):
+    for i, col in enumerate(df.columns[:10], 1):  # Limit to first 10 columns
         dtype = df[col].dtype
         missing = df[col].isnull().sum()
         missing_pct = (missing / len(df)) * 100
         lines.append(f"- **{col}**: `{dtype}` (Missing: {missing} / {missing_pct:.1f}%)")
+    
+    if len(df.columns) > 10:
+        lines.append(f"- ... and {len(df.columns) - 10} more columns")
 
     lines.append("\n")
 
@@ -151,16 +194,18 @@ def generate_markdown_report(df: pd.DataFrame, llm_report: str, file_name: str) 
         lines.append(f"| Consistency | {quality_report['consistency']}% | {'✅' if quality_report['consistency'] > 80 else '⚠️'} |")
         lines.append(f"| Duplicate Rate | {quality_report['duplicate_rate']}% | {'✅' if quality_report['duplicate_rate'] < 5 else '⚠️'} |\n")
         
-        if quality_report.get('missing_per_col') and len(quality_report['missing_per_col']) > 0:
+        if hasattr(quality_report, 'get') and quality_report.get('missing_per_col') and len(quality_report['missing_per_col']) > 0:
             lines.append("### 🔍 Missing Values by Column\n")
-            for col, count in quality_report['missing_per_col'].head(5).items():
+            for col, count in list(quality_report['missing_per_col'].items())[:5]:
                 pct = (count / df.shape[0]) * 100
                 lines.append(f"- **{col}**: {count:,} missing ({pct:.1f}%)")
 
     if numeric_cols:
         lines.append("\n## 📊 3. Statistical Summary\n")
         desc = df[numeric_cols].describe().round(2)
+        lines.append("```")
         lines.append(desc.to_string())
+        lines.append("```")
         lines.append("\n")
 
     lines.append("## 💡 4. AI-Generated Insights\n")
@@ -235,7 +280,7 @@ def render():
         """, unsafe_allow_html=True)
 
     completed = sum(1 for _, done in steps if done)
-    progress = completed / len(steps)
+    progress = completed / len(steps) if len(steps) > 0 else 0
     
     st.progress(progress)
     st.caption(f"📌 {completed}/{len(steps)} steps completed - {int(progress*100)}% ready for report generation")
@@ -261,15 +306,16 @@ def render():
         generate_btn = st.button("🚀 Generate Full Report", use_container_width=True, type="primary")
 
     if generate_btn:
-        context = build_full_context(df)
+        try:
+            context = build_full_context(df)
 
-        system_prompt = f"""You are a senior data analyst writing a professional analysis report.
+            system_prompt = f"""You are a senior data analyst writing a professional analysis report.
 Tone: {report_tone}.
 Write clearly, use structure (headings, bullet points), and be specific with numbers.
 This report will be read by {'business stakeholders' if 'Executive' in report_tone else 'technical teams'}.
 Use markdown formatting for better readability."""
 
-        user_prompt = f"""Write a comprehensive data analysis report based on the following dataset analysis.
+            user_prompt = f"""Write a comprehensive data analysis report based on the following dataset analysis.
 
 {context}
 
@@ -287,21 +333,24 @@ Structure your report with these sections:
 ## Trend Analysis
 - 3-4 patterns observed in the data with specific examples
 
-{'## Strategic Recommendations' if include_recs else ''}
-- 3 actionable, specific next steps
+{f'## Strategic Recommendations' if include_recs else ''}
+{f'- 3 actionable, specific next steps' if include_recs else ''}
 
 Keep the report professional, specific, and under 600 words. Use markdown formatting."""
 
-        with st.spinner("📝 Generating comprehensive report..."):
-            llm_report = call_llm(user_prompt, system_prompt, max_tokens=1600)
-            st.session_state.report_text = llm_report
+            with st.spinner("📝 Generating comprehensive report..."):
+                llm_report = call_llm(user_prompt, system_prompt, max_tokens=1600)
+                st.session_state.report_text = llm_report
 
-            # Build full markdown report
-            full_report = generate_markdown_report(df, llm_report, file_name)
-            st.session_state.full_report_md = full_report
+                # Build full markdown report
+                full_report = generate_markdown_report(df, llm_report, file_name)
+                st.session_state.full_report_md = full_report
 
-        st.success("✅ Report generated successfully!")
-        st.balloons()
+            st.success("✅ Report generated successfully!")
+            st.balloons()
+        except Exception as e:
+            st.error(f"Error generating report: {str(e)}")
+            st.info("Please make sure you have completed the previous agents or try again.")
 
     # Display report
     if st.session_state.get("report_text"):
@@ -368,7 +417,7 @@ Keep the report professional, specific, and under 600 words. Use markdown format
                     <span style="font-weight: 700; font-size: 1.2rem; margin-left: 0.5rem;">Analysis Complete!</span>
                 </div>
                 <div style="color: rgba(255,255,255,0.7); font-size: 0.85rem;">
-                    All 6 agents have been executed successfully
+                    All agents have been executed successfully
                 </div>
             </div>
         </div>
@@ -398,7 +447,7 @@ Keep the report professional, specific, and under 600 words. Use markdown format
                 Ready to Generate Report
             </div>
             <div style="font-size: 0.9rem; color: rgba(255,255,255,0.6); max-width: 400px; margin: 0 auto;">
-                Complete the previous agents (Quality, Cleaning, Stats, Visualization, Insights) for the best results, or generate now with available data.
+                Complete the previous agents (Quality, Cleaning, Stats, Visualization, Insights) for the best results, or click Generate to create a report with available data.
             </div>
         </div>
         """, unsafe_allow_html=True)
