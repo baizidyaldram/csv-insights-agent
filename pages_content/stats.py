@@ -18,18 +18,16 @@ def render():
 
     df = get_df()
     
-    # Tab 3: Data Profile (NEW)
-with tab3:
-    if st.session_state.get("data_profile"):
-        display_data_profile(st.session_state.data_profile)
-    else:
-        st.info("Click 'Generate Data Profile' to see comprehensive data analysis.")
-        if st.button("📊 Generate Data Profile Now", use_container_width=True):
+    # Run Analysis button
+    col1, col2 = st.columns([1, 3])
+    with col1:
+        if st.button("▶ Run Statistical Analysis", use_container_width=False):
+            st.session_state.stats_done = True
+        if st.button("📊 Generate Data Profile", use_container_width=False):
             with st.spinner("Generating comprehensive data profile..."):
-                from utils.data_profiler import generate_data_profile
                 profile = generate_data_profile(df)
                 st.session_state.data_profile = profile
-                st.rerun()
+                st.session_state.stats_done = True
     
     if st.session_state.get("stats_done"):
         # Create tabs for different analyses
@@ -76,14 +74,14 @@ with tab3:
             else:
                 st.info("Need at least 2 numeric columns for correlation analysis.")
         
-        # Tab 3: Data Profile (NEW)
+        # Tab 3: Data Profile
         with tab3:
             if st.session_state.get("data_profile"):
                 display_data_profile(st.session_state.data_profile)
             else:
                 st.info("Click 'Generate Data Profile' above to see comprehensive data analysis.")
-                if st.button("Generate Data Profile Now"):
-                    with st.spinner("Generating profile..."):
+                if st.button("📊 Generate Data Profile Now", use_container_width=True):
+                    with st.spinner("Generating comprehensive data profile..."):
                         profile = generate_data_profile(df)
                         st.session_state.data_profile = profile
                         st.rerun()
@@ -101,7 +99,8 @@ with tab3:
                     with col1:
                         st.metric("Unique Values", df[selected_cat].nunique())
                     with col2:
-                        st.metric("Most Common", str(value_counts.index[0]) if len(value_counts) > 0 else "N/A")
+                        most_common = str(value_counts.index[0]) if len(value_counts) > 0 else "N/A"
+                        st.metric("Most Common", most_common)
                     with col3:
                         st.metric("Missing", df[selected_cat].isnull().sum())
                     
@@ -114,6 +113,7 @@ with tab3:
                 st.info("No categorical columns found in this dataset.")
         
         # Navigation buttons
+        st.markdown("---")
         col_nav1, col_nav2 = st.columns(2)
         with col_nav1:
             if st.button("← Back to Cleaning", use_container_width=True):
