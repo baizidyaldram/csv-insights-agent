@@ -10,7 +10,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Modern CSS with Beautiful Background ──────────────────────────────────────
+# ── Modern CSS with Beautiful Background (from app (1).py) ──────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700&display=swap');
@@ -70,19 +70,7 @@ st.markdown("""
     color: #ffffff !important;
 }
 
-/* Sidebar content styling */
-[data-testid="stSidebar"] .stMarkdown {
-    color: #ffffff;
-}
-
-/* Custom sidebar toggle */
-[data-testid="collapsedControl"] {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 0 12px 12px 0;
-    padding: 8px 12px;
-}
-
-/* Modern Cards with Gradient */
+/* Modern Cards */
 .glass-card, .agent-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
     backdrop-filter: blur(10px);
@@ -90,12 +78,10 @@ st.markdown("""
     border-radius: 24px;
     padding: 1.5rem;
     transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
 }
 
 .glass-card:hover, .agent-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
     border-color: rgba(255, 255, 255, 0.4);
 }
 
@@ -104,59 +90,6 @@ st.markdown("""
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 700;
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-}
-
-.agent-card p {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.85rem;
-}
-
-/* Metric Cards */
-.metric-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
-    padding: 1.2rem;
-    text-align: center;
-    transition: all 0.3s ease;
-}
-
-.metric-card:hover {
-    transform: scale(1.05);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.1));
-}
-
-.metric-card .value {
-    font-size: 2rem;
-    font-weight: 800;
-    background: linear-gradient(135deg, #fff, #f093fb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.metric-card .label {
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.7);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-top: 0.5rem;
-}
-
-/* Upload Area */
-[data-testid="stFileUploader"] {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 2px dashed rgba(255, 255, 255, 0.3);
-    border-radius: 24px;
-    padding: 2rem;
-}
-
-[data-testid="stFileUploader"]:hover {
-    border-color: #fff;
-    background: rgba(255, 255, 255, 0.15);
 }
 
 /* Buttons */
@@ -168,13 +101,19 @@ st.markdown("""
     font-weight: 600;
     padding: 0.6rem 2rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .stButton > button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
     background: linear-gradient(135deg, #764ba2, #667eea);
+}
+
+/* Headers */
+h1, h2, h3 {
+    background: linear-gradient(135deg, #ffffff, #f093fb);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 800;
 }
 
 /* Status Badges */
@@ -195,20 +134,23 @@ st.markdown("""
     font-weight: 600;
 }
 
-/* Headers */
-h1, h2, h3 {
-    background: linear-gradient(135deg, #ffffff, #f093fb);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 800;
-    letter-spacing: -0.02em;
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
 }
 
-h1 {
-    font-size: 3rem !important;
+::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
 }
 
-/* Dataframe */
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 10px;
+}
+
+/* Dataframe styling */
 [data-testid="stDataFrame"] {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
@@ -236,75 +178,12 @@ h1 {
     color: white;
 }
 
-/* Divider */
-hr {
-    border: none;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.5), transparent);
-    margin: 2rem 0;
-}
-
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    border-radius: 10px;
-}
-
-/* Info/Warning/Success boxes */
-.stAlert {
-    background: rgba(255, 255, 255, 0.1) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 16px !important;
-    color: white !important;
-}
-
-/* Select boxes */
-[data-baseweb="select"] {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
-}
-
-/* Text area */
-[data-testid="stTextArea"] textarea {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
-    color: white;
-}
-
 /* Metrics */
 [data-testid="stMetric"] {
     background: rgba(255, 255, 255, 0.05);
     backdrop-filter: blur(10px);
     border-radius: 16px;
     padding: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-[data-testid="stMetricLabel"] {
-    color: rgba(255, 255, 255, 0.8) !important;
-}
-
-[data-testid="stMetricValue"] {
-    color: white !important;
-}
-
-/* Expander */
-[data-testid="stExpander"] {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 </style>
