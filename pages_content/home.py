@@ -66,12 +66,22 @@ def render():
 
         if st.button("📦 Load Sample Dataset", use_container_width=True):
             try:
-                df = pd.read_csv("data/sample_orders.csv")
-                set_df(df, "sample_orders.csv")
+                # Create sample data if file doesn't exist
+                sample_df = pd.DataFrame({
+                    'order_id': range(1001, 1011),
+                    'order_date': pd.date_range('2024-01-15', periods=10, freq='D'),
+                    'customer_name': ['John Smith', 'Emma Wilson', 'Michael Brown', 'Sarah Davis', 'James Johnson',
+                                     'Lisa Anderson', 'Robert Taylor', 'Maria Garcia', 'David Martinez', 'Jennifer Lee'],
+                    'product_category': ['Electronics', 'Clothing', 'Books', 'Electronics', 'Clothing',
+                                        'Home', 'Electronics', 'Books', 'Clothing', 'Home'],
+                    'quantity': [2, 3, 1, 1, 4, 2, 1, 5, 2, 1],
+                    'price': [299.99, 49.99, 19.99, 899.99, 29.99, 159.99, 499.99, 12.99, 39.99, 299.99],
+                    'total_amount': [599.98, 149.97, 19.99, 899.99, 119.96, 319.98, 499.99, 64.95, 79.98, 299.99],
+                    'region': ['North', 'South', 'East', 'West', 'North', 'South', 'East', 'West', 'North', 'South']
+                })
+                set_df(sample_df, "sample_orders.csv")
                 st.success("✅ Sample dataset loaded!")
                 st.balloons()
-            except FileNotFoundError:
-                st.error("Sample dataset not found. Please upload your own CSV.")
             except Exception as e:
                 st.error(f"Error: {e}")
 
@@ -92,7 +102,7 @@ def render():
                 numeric_count = df.select_dtypes(include="number").shape[1]
                 st.metric("Numeric Columns", numeric_count)
             with m4:
-                missing_pct = (df.isnull().sum().sum() / df.size * 100)
+                missing_pct = (df.isnull().sum().sum() / df.size * 100) if df.size > 0 else 0
                 st.metric("Missing Data", f"{missing_pct:.1f}%")
             
             # Data preview
