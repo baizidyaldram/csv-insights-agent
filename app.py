@@ -3,8 +3,14 @@ from utils.session import init_session, get_df, is_data_loaded
 import pandas as pd
 import sys
 import os
-import psutil
 from datetime import datetime
+
+# Try to import psutil, but don't fail if not available
+try:
+    import psutil
+    PSUTIL_AVAILABLE = True
+except ImportError:
+    PSUTIL_AVAILABLE = False
 
 # Add the current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -39,19 +45,6 @@ st.markdown("""
     --border-radius-md: 12px;
     --border-radius-lg: 16px;
     --transition-speed: 200ms;
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-/* Light Theme */
-[data-theme="light"] {
-    --bg-primary: #F8FAFC;
-    --bg-secondary: #FFFFFF;
-    --bg-card: rgba(255, 255, 255, 0.9);
-    --text-primary: #0F172A;
-    --text-secondary: #475569;
-    --border-color: #E2E8F0;
 }
 
 /* Global Styles */
@@ -86,7 +79,7 @@ st.markdown("""
 
 .glass-card:hover {
     transform: translateY(-2px);
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 /* Hide Streamlit Branding */
@@ -121,12 +114,6 @@ st.markdown("""
     transform: translateX(4px);
 }
 
-[data-testid="stSidebar"] .stButton button[data-testid="baseButton-primary"] {
-    background: linear-gradient(135deg, var(--accent-info), var(--accent-success));
-    border: none;
-    color: white !important;
-}
-
 /* Metric Cards */
 .metric-card {
     background: var(--bg-card);
@@ -135,11 +122,6 @@ st.markdown("""
     padding: 1rem;
     text-align: center;
     transition: all var(--transition-speed) ease;
-}
-
-.metric-card:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent-info);
 }
 
 .metric-value {
@@ -169,7 +151,7 @@ st.markdown("""
 
 .stButton > button:hover {
     transform: translateY(-1px);
-    box-shadow: var(--shadow-md);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* Status Badges */
@@ -192,65 +174,6 @@ st.markdown("""
     font-weight: 600;
 }
 
-/* Progress Timeline */
-.progress-timeline {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin: 1rem 0;
-}
-
-.timeline-step {
-    text-align: center;
-    flex: 1;
-    position: relative;
-}
-
-.timeline-step .step-icon {
-    width: 40px;
-    height: 40px;
-    background: var(--bg-secondary);
-    border: 2px solid var(--border-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 0.5rem;
-    transition: all var(--transition-speed) ease;
-}
-
-.timeline-step.completed .step-icon {
-    background: var(--accent-success);
-    border-color: var(--accent-success);
-    color: white;
-}
-
-.timeline-step.active .step-icon {
-    border-color: var(--accent-info);
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-/* Data Table Styling */
-[data-testid="stDataFrame"] {
-    background: var(--bg-card);
-    border-radius: var(--border-radius-md);
-    border: 1px solid var(--border-color);
-}
-
-/* File Uploader */
-[data-testid="stFileUploader"] {
-    background: var(--bg-card);
-    border: 2px dashed var(--border-color);
-    border-radius: var(--border-radius-lg);
-    padding: 2rem;
-    transition: all var(--transition-speed) ease;
-}
-
-[data-testid="stFileUploader"]:hover {
-    border-color: var(--accent-info);
-    background: rgba(59, 130, 246, 0.05);
-}
-
 /* Scrollbar */
 ::-webkit-scrollbar {
     width: 8px;
@@ -267,30 +190,6 @@ st.markdown("""
     border-radius: 10px;
 }
 
-/* Toast Notification */
-.toast-notification {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background: var(--accent-success);
-    color: white;
-    padding: 0.75rem 1.25rem;
-    border-radius: var(--border-radius-md);
-    animation: slideIn 0.3s ease;
-    z-index: 1000;
-}
-
-@keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
-}
-
 /* Responsive Design */
 @media (max-width: 768px) {
     .main .block-container {
@@ -300,39 +199,8 @@ st.markdown("""
     .metric-value {
         font-size: 1.5rem;
     }
-    
-    [data-testid="stSidebar"] {
-        transform: translateX(-100%);
-        position: fixed;
-        z-index: 100;
-    }
-    
-    [data-testid="stSidebar"].open {
-        transform: translateX(0);
-    }
 }
 </style>
-
-<script>
-// Theme initialization
-function initTheme() {
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const savedTheme = localStorage.getItem('theme');
-    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
-    document.documentElement.setAttribute('data-theme', theme);
-}
-
-// Keyboard shortcuts
-document.addEventListener('keydown', (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-        e.preventDefault();
-        const searchInput = document.querySelector('[data-testid="stTextInput"] input');
-        if (searchInput) searchInput.focus();
-    }
-});
-
-initTheme();
-</script>
 """, unsafe_allow_html=True)
 
 # ── Session init ──────────────────────────────────────────────────────────────
@@ -342,19 +210,6 @@ init_session()
 with st.sidebar:
     st.markdown("## 🤖 CSV Agent Analyzer")
     st.markdown("### AI-Powered Analysis")
-    st.markdown("---")
-    
-    # Theme toggle in sidebar
-    col_theme1, col_theme2 = st.columns(2)
-    with col_theme1:
-        if st.button("🌙 Dark", use_container_width=True, key="theme_dark"):
-            st.markdown('<script>document.documentElement.setAttribute("data-theme", "dark"); localStorage.setItem("theme", "dark");</script>', unsafe_allow_html=True)
-            st.rerun()
-    with col_theme2:
-        if st.button("☀️ Light", use_container_width=True, key="theme_light"):
-            st.markdown('<script>document.documentElement.setAttribute("data-theme", "light"); localStorage.setItem("theme", "light");</script>', unsafe_allow_html=True)
-            st.rerun()
-    
     st.markdown("---")
     
     pages = {
@@ -436,16 +291,12 @@ with st.sidebar:
         
         with st.expander("📊 Quick Preview"):
             st.dataframe(df.head(3), use_container_width=True)
-        
-        # Memory usage
-        memory_mb = df.memory_usage(deep=True).sum() / 1024 / 1024
-        st.caption(f"💾 Memory: {memory_mb:.1f} MB")
     else:
         st.markdown(f'<span class="badge-warning">⏳ No Data</span>', unsafe_allow_html=True)
         st.caption("Upload a CSV to begin")
     
     st.markdown("---")
-    st.caption("💡 Press **Ctrl+K** to search")
+    st.caption("💡 Click the ◀ arrow to collapse")
 
 # ── Page Router ───────────────────────────────────────────────────────────────
 page = st.session_state.current_page
