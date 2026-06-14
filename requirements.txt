@@ -16,3 +16,4 @@ category-encoders
 joblib
 tqdm
 psutil
+matplotlib
