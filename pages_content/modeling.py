@@ -12,9 +12,10 @@ from sklearn.linear_model import LogisticRegression, LinearRegression, Ridge
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.metrics import (
     accuracy_score, precision_score, recall_score, f1_score, confusion_matrix,
-    roc_curve, auc, r2_score, mean_absolute_error, mean_squared_error
+    r2_score, mean_absolute_error, mean_squared_error
 )
 from utils.session import get_df, is_data_loaded
+from utils.llm import call_llm
 
 # Try to import optional libraries
 try:
@@ -118,7 +119,8 @@ def render():
     with col_split:
         test_size = st.slider("Test Split Size (%)", 10, 40, 20, 5) / 100.0
         random_state = st.number_input("Random Seed", value=42, step=1)
-        cv_folds = st.number_input("Cross-Validation Folds", min_value=2, max_value=10, value=5)
+        use_cv = st.checkbox("Enable Cross-Validation (slower)", value=False)
+        cv_folds = st.number_input("CV Folds", min_value=2, max_value=10, value=5, disabled=not use_cv)
         
     with col_scale:
         scaling_method = st.selectbox(
@@ -188,7 +190,7 @@ def render():
 
     if train_clicked:
         run_training(df, target_col, features_list, task_type, selected_model_names, available_models, 
-                     test_size, random_state, scaling_method, cv_folds, handle_imbalance)
+                     test_size, random_state, scaling_method, cv_folds, handle_imbalance, use_cv)
 
     # ── Display results ───────────────────────────────────────────────────────
     if st.session_state.get("modeling_done"):
@@ -196,7 +198,7 @@ def render():
 
 
 def run_training(df, target_col, features_list, task_type, selected_model_names, available_models, 
-                 test_size, random_state, scaling_method, cv_folds, handle_imbalance):
+                 test_size, random_state, scaling_method, cv_folds, handle_imbalance, use_cv):
     
     st.session_state.modeling_log = []
     
@@ -284,15 +286,16 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
         # Calculate metrics
         model_metrics = calculate_metrics(y_test, y_pred, task_type, model, X_test)
         
-        # Cross-validation score
-        try:
-            cv_scores = cross_val_score(model, X_train, y_train, cv=min(cv_folds, 3), 
-                                        scoring='accuracy' if task_type == 'classification' else 'r2')
-            model_metrics["cv_mean"] = cv_scores.mean()
-            model_metrics["cv_std"] = cv_scores.std()
-        except:
-            model_metrics["cv_mean"] = None
-            model_metrics["cv_std"] = None
+        # Cross-validation score (optional)
+        if use_cv:
+            try:
+                cv_scores = cross_val_score(model, X_train, y_train, cv=min(cv_folds, 3), 
+                                            scoring='accuracy' if task_type == 'classification' else 'r2')
+                model_metrics["cv_mean"] = cv_scores.mean()
+                model_metrics["cv_std"] = cv_scores.std()
+            except:
+                model_metrics["cv_mean"] = None
+                model_metrics["cv_std"] = None
         
         metrics_report[model_name] = model_metrics
         log_step(f"✓ {model_name} complete")
@@ -318,6 +321,11 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
         st.session_state.model_encoded_categories = cat_mappings
         st.session_state.model_target_inverse_mapping = y_inverse_mapping
         st.session_state.modeling_done = True
+        
+        # Generate AI recommendation
+        with st.spinner("🧠 Generating AI model recommendation..."):
+            recommendation = generate_ai_recommendation(metrics_report, task_type, features_list, len(df_clean), best_model_name)
+            st.session_state.model_recommendation = recommendation
         
         log_step(f"🏆 Best model: {best_model_name}")
         st.success(f"✅ Modeling complete! Best model: {best_model_name}")
@@ -390,28 +398,286 @@ def calculate_metrics(y_test, y_pred, task_type, model, X_test):
     return metrics
 
 
+def generate_ai_recommendation(metrics_report, task_type, features_list, n_rows, best_model):
+    """Generate AI-powered model recommendation."""
+    
+    # Build summary of all models
+    summary_lines = [f"Dataset: {n_rows} rows, {len(features_list)} features"]
+    summary_lines.append(f"Task: {task_type}")
+    summary_lines.append(f"Best model: {best_model}\n")
+    summary_lines.append("Model Performance Summary:")
+    
+    for model_name, metrics in metrics_report.items():
+        if task_type == "classification":
+            acc = metrics.get("Accuracy", 0)
+            f1 = metrics.get("F1-Score", 0)
+            summary_lines.append(f"- {model_name}: Accuracy={acc:.4f}, F1={f1:.4f}")
+        else:
+            r2 = metrics.get("R2 Score", 0)
+            rmse = metrics.get("RMSE", 0)
+            summary_lines.append(f"- {model_name}: R²={r2:.4f}, RMSE={rmse:.4f}")
+    
+    summary = "\n".join(summary_lines)
+    
+    prompt = f"""Based on the following model performance results, provide a recommendation:
+
+{summary}
+
+Please provide:
+1. **Best Model Recommendation**: Which model is best and why?
+2. **Key Insights**: What do the results tell us about the data?
+3. **Improvement Suggestions**: 2-3 specific ways to improve model performance
+4. **Business Implications**: What do these results mean for real-world use?
+
+Keep it concise and actionable. Use markdown formatting with bullet points.
+"""
+    
+    system_prompt = "You are a senior machine learning engineer providing model recommendations."
+    
+    try:
+        recommendation = call_llm(prompt, system_prompt, max_tokens=600)
+        return recommendation
+    except Exception as e:
+        return f"⚠️ Could not generate AI recommendation: {str(e)}"
+
+
+def create_model_comparison_chart(metrics_dict: dict, task_type: str):
+    """Create bar chart comparing model performance metrics."""
+    
+    if not metrics_dict:
+        return None
+    
+    comparison_data = []
+    
+    for model_name, metrics in metrics_dict.items():
+        row = {"Model": model_name}
+        
+        if task_type == "classification":
+            metric_keys = ["Accuracy", "Precision", "Recall", "F1-Score"]
+        else:
+            metric_keys = ["R2 Score", "MAE", "RMSE"]
+        
+        for key in metric_keys:
+            if key in metrics and isinstance(metrics[key], (int, float)):
+                row[key] = round(metrics[key], 4)
+        
+        if "cv_mean" in metrics and metrics["cv_mean"]:
+            row["CV Score"] = round(metrics["cv_mean"], 4)
+            
+        comparison_data.append(row)
+    
+    if not comparison_data:
+        return None
+        
+    df_comparison = pd.DataFrame(comparison_data)
+    
+    if task_type == "classification":
+        metrics_to_plot = ["Accuracy", "Precision", "Recall", "F1-Score"]
+        title = "📊 Model Performance Comparison (Classification)"
+        y_title = "Score (higher is better)"
+    else:
+        metrics_to_plot = ["R2 Score"]
+        title = "📊 Model Performance Comparison (Regression)"
+        y_title = "R² Score (higher is better)"
+    
+    available_metrics = [m for m in metrics_to_plot if m in df_comparison.columns]
+    
+    if not available_metrics:
+        return None
+    
+    fig = px.bar(
+        df_comparison,
+        x="Model",
+        y=available_metrics,
+        barmode="group",
+        title=title,
+        labels={"value": y_title, "variable": "Metric", "Model": "Algorithm"},
+        color_discrete_sequence=px.colors.sequential.Viridis,
+        text_auto='.3f'
+    )
+    
+    fig.update_layout(
+        template="plotly_dark",
+        height=500,
+        hovermode="x unified",
+        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        plot_bgcolor="rgba(0,0,0,0.2)",
+        paper_bgcolor="rgba(0,0,0,0)",
+        font=dict(color="#e2e2f0")
+    )
+    
+    fig.update_traces(
+        textposition="outside",
+        marker_line_width=1,
+        marker_line_color="white"
+    )
+    
+    return fig
+
+
+def create_feature_importance_chart(feature_importances, features_list, top_n: int = 10):
+    """Create horizontal bar chart for feature importance."""
+    
+    if not feature_importances:
+        return None
+    
+    # Handle both dict and list formats
+    if isinstance(feature_importances, list):
+        importances_dict = dict(zip(features_list, feature_importances))
+    else:
+        importances_dict = feature_importances
+    
+    sorted_features = sorted(importances_dict.items(), key=lambda x: x[1], reverse=True)[:top_n]
+    
+    df_importance = pd.DataFrame(sorted_features, columns=["Feature", "Importance"])
+    
+    fig = px.bar(
+        df_importance,
+        x="Importance",
+        y="Feature",
+        orientation="h",
+        title=f"Top {top_n} Feature Importances",
+        labels={"Importance": "Importance Score", "Feature": ""},
+        color="Importance",
+        color_continuous_scale="Viridis",
+        text_auto='.3f'
+    )
+    
+    fig.update_layout(
+        template="plotly_dark",
+        height=400,
+        yaxis=dict(categoryorder="total ascending"),
+        plot_bgcolor="rgba(0,0,0,0.2)",
+        coloraxis_showscale=False
+    )
+    
+    fig.update_traces(marker_line_width=0)
+    
+    return fig
+
+
+def create_confusion_matrix_heatmap(cm_matrix):
+    """Create confusion matrix heatmap."""
+    
+    if not cm_matrix:
+        return None
+    
+    fig = px.imshow(
+        cm_matrix,
+        text_auto=True,
+        title="Confusion Matrix",
+        labels=dict(x="Predicted", y="Actual", color="Count"),
+        color_continuous_scale="Blues",
+        aspect="auto"
+    )
+    
+    fig.update_layout(
+        template="plotly_dark",
+        height=450,
+        plot_bgcolor="rgba(0,0,0,0.2)"
+    )
+    
+    return fig
+
+
 def display_results(task_type):
-    """Display model results."""
+    """Display model results with visualizations."""
     metrics = st.session_state.model_metrics
     best_model_name = st.session_state.trained_model_name
     
     st.markdown("---")
-    st.markdown("### 🏆 Model Comparison")
+    st.markdown("### 🏆 Model Performance Results")
     
-    # Build comparison dataframe
-    comp_data = []
-    for model_name, data in metrics.items():
-        row = {"Model": model_name}
-        for metric, val in data.items():
-            if isinstance(val, (int, float)):
-                row[metric] = round(val, 4)
-        comp_data.append(row)
+    # Create tabs for different views
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Comparison", "📈 Visualizations", "🤖 AI Recommendation", "📋 Details"])
     
-    if comp_data:
-        comp_df = pd.DataFrame(comp_data)
-        st.dataframe(comp_df, use_container_width=True, hide_index=True)
+    with tab1:
+        st.markdown("#### Model Comparison Table")
+        comparison_data = []
+        for model_name, data in metrics.items():
+            row = {"Model": model_name}
+            for metric, val in data.items():
+                if isinstance(val, (int, float)):
+                    row[metric] = round(val, 4)
+            comparison_data.append(row)
+        
+        if comparison_data:
+            comp_df = pd.DataFrame(comparison_data)
+            st.dataframe(comp_df, use_container_width=True, hide_index=True)
+            
+            # Highlight best model
+            st.success(f"💡 **Best Model:** {best_model_name}")
     
-    st.success(f"💡 **Best Model:** {best_model_name}")
+    with tab2:
+        st.markdown("#### Model Comparison Charts")
+        
+        # Bar chart
+        fig_bar = create_model_comparison_chart(metrics, task_type)
+        if fig_bar:
+            st.plotly_chart(fig_bar, use_container_width=True)
+        
+        # Feature importance for best model
+        best_metrics = metrics.get(best_model_name, {})
+        if "feature_importances" in best_metrics and st.session_state.model_features_list:
+            st.markdown("#### Feature Importance (Best Model)")
+            fig_importance = create_feature_importance_chart(
+                best_metrics["feature_importances"], 
+                st.session_state.model_features_list, 
+                top_n=10
+            )
+            if fig_importance:
+                st.plotly_chart(fig_importance, use_container_width=True)
+        
+        # Confusion matrix for classification
+        if task_type == "classification" and "confusion_matrix" in best_metrics:
+            st.markdown("#### Confusion Matrix (Best Model)")
+            fig_cm = create_confusion_matrix_heatmap(best_metrics["confusion_matrix"])
+            if fig_cm:
+                st.plotly_chart(fig_cm, use_container_width=True)
+    
+    with tab3:
+        st.markdown("#### 🤖 AI Model Recommendation")
+        if st.session_state.get("model_recommendation"):
+            recommendation = st.session_state.model_recommendation
+            # Format the recommendation for display
+            st.markdown(recommendation)
+        else:
+            st.info("AI recommendation not available. Click 'Run Modeling' again to generate.")
+    
+    with tab4:
+        st.markdown("#### Best Model Details")
+        
+        best_metrics = metrics[best_model_name]
+        
+        if task_type == "classification":
+            col1, col2, col3, col4 = st.columns(4)
+            with col1:
+                st.metric("Accuracy", f"{best_metrics.get('Accuracy', 0):.4f}")
+            with col2:
+                st.metric("Precision", f"{best_metrics.get('Precision', 0):.4f}")
+            with col3:
+                st.metric("Recall", f"{best_metrics.get('Recall', 0):.4f}")
+            with col4:
+                st.metric("F1-Score", f"{best_metrics.get('F1-Score', 0):.4f}")
+        else:
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("R² Score", f"{best_metrics.get('R2 Score', 0):.4f}")
+            with col2:
+                st.metric("MAE", f"{best_metrics.get('MAE', 0):.4f}")
+            with col3:
+                st.metric("RMSE", f"{best_metrics.get('RMSE', 0):.4f}")
+        
+        if "cv_mean" in best_metrics and best_metrics["cv_mean"]:
+            st.metric("Cross-Validation Score", f"{best_metrics['cv_mean']:.4f} ± {best_metrics.get('cv_std', 0):.4f}")
+        
+        st.markdown("#### Model Configuration")
+        st.markdown(f"""
+        - **Task Type:** `{task_type.upper()}`
+        - **Target Variable:** `{st.session_state.model_target_col}`
+        - **Features Used:** {len(st.session_state.model_features_list)} columns
+        - **Training/Test Split:** {int((1 - 0.2) * 100)}% / 20%
+        """)
     
     # Navigation
     st.markdown("---")
@@ -421,5 +687,6 @@ def display_results(task_type):
             st.session_state.current_page = "visualization"
             st.rerun()
     with col2:
-        if st.button("➡️ Proceed to AI Insights", use_container_width=True):
-            st.session_state.current_page = "insights"
+        if st.button("➡️ Proceed to AI Insights & Report", use_container_width=True):
+            st.session_state.current_page = "ai_report"
+            st.rerun()
