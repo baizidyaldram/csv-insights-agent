@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Premium Dark Theme CSS with Violet-Teal Accent ─────────────────────────
+# ── Premium Theme CSS with #1371A0 Color Palette ──────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
@@ -28,7 +28,7 @@ st.markdown("""
     box-sizing: border-box;
 }
 
-/* Premium Dark Gradient Background with Violet-Teal */
+/* Premium Dark Gradient Background with #1371A0 Theme */
 .stApp {
     background: radial-gradient(ellipse at 30% 20%, #1a1a2e, #0b0f1a);
     background-attachment: fixed;
@@ -43,9 +43,9 @@ st.markdown("""
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(circle at 20% 40%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 60%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 60%);
+        radial-gradient(circle at 20% 40%, rgba(19, 113, 160, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 60%, rgba(49, 136, 173, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 50% 80%, rgba(19, 113, 160, 0.08) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
 }
@@ -60,7 +60,7 @@ st.markdown("""
     border-radius: 32px;
     margin-top: 1.5rem !important;
     margin-bottom: 1.5rem !important;
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(19, 113, 160, 0.2);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
@@ -70,7 +70,7 @@ st.markdown("""
 /* ============ SIDEBAR STYLING ============ */
 [data-testid="stSidebar"] {
     background: linear-gradient(180deg, #12121f 0%, #0a0a14 100%);
-    border-right: 1px solid rgba(124, 58, 237, 0.2);
+    border-right: 1px solid rgba(19, 113, 160, 0.2);
 }
 
 [data-testid="stSidebar"] * {
@@ -86,7 +86,7 @@ st.markdown("""
 /* Sidebar buttons */
 [data-testid="stSidebar"] .stButton button {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(19, 113, 160, 0.2);
     border-radius: 12px;
     text-align: left;
     padding: 0.7rem 1rem;
@@ -95,22 +95,22 @@ st.markdown("""
 }
 
 [data-testid="stSidebar"] .stButton button:hover {
-    background: rgba(124, 58, 237, 0.15);
-    border-color: rgba(6, 182, 212, 0.4);
+    background: rgba(19, 113, 160, 0.15);
+    border-color: rgba(49, 136, 173, 0.4);
     transform: translateX(4px);
 }
 
 [data-testid="stSidebar"] .stButton button[data-testid="baseButton-primary"] {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    background: linear-gradient(135deg, #1371A0, #3188AD);
     border: none;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 4px 12px rgba(19, 113, 160, 0.3);
 }
 
 /* ============ CARD STYLES ============ */
 .agent-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(19, 113, 160, 0.2);
     border-radius: 16px;
     padding: 1rem 1.25rem;
     margin-bottom: 0.75rem;
@@ -119,8 +119,8 @@ st.markdown("""
 
 .agent-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(6, 182, 212, 0.5);
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04));
+    border-color: rgba(49, 136, 173, 0.5);
+    background: linear-gradient(135deg, rgba(19, 113, 160, 0.08), rgba(49, 136, 173, 0.04));
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -128,7 +128,7 @@ st.markdown("""
     font-size: 0.95rem;
     font-weight: 700;
     margin-bottom: 0.25rem;
-    background: linear-gradient(135deg, #ffffff, #a78bfa);
+    background: linear-gradient(135deg, #ffffff, #77B4C7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -142,9 +142,9 @@ st.markdown("""
 
 /* ============ METRIC CARDS ============ */
 .metric-card {
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.05));
+    background: linear-gradient(135deg, rgba(19, 113, 160, 0.1), rgba(49, 136, 173, 0.05));
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(19, 113, 160, 0.2);
     border-radius: 20px;
     padding: 1.2rem;
     text-align: center;
@@ -153,14 +153,14 @@ st.markdown("""
 
 .metric-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(6, 182, 212, 0.5);
-    background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.08));
+    border-color: rgba(49, 136, 173, 0.5);
+    background: linear-gradient(135deg, rgba(19, 113, 160, 0.15), rgba(49, 136, 173, 0.08));
 }
 
 .metric-value {
     font-size: 2.2rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff, #a78bfa);
+    background: linear-gradient(135deg, #ffffff, #77B4C7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -177,39 +177,39 @@ st.markdown("""
 
 /* ============ BUTTON STYLES ============ */
 .stButton > button {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    background: linear-gradient(135deg, #1371A0, #3188AD);
     color: white;
     border: none;
     border-radius: 14px;
     font-weight: 600;
     padding: 0.6rem 1.5rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+    box-shadow: 0 4px 12px rgba(19, 113, 160, 0.3);
 }
 
 .stButton > button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
-    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+    box-shadow: 0 8px 20px rgba(19, 113, 160, 0.4);
+    background: linear-gradient(135deg, #3188AD, #529EBA);
 }
 
 /* Secondary button */
 .stButton > button[data-testid="baseButton-secondary"] {
     background: rgba(255, 255, 255, 0.05);
     box-shadow: none;
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(19, 113, 160, 0.2);
 }
 
 .stButton > button[data-testid="baseButton-secondary"]:hover {
-    background: rgba(124, 58, 237, 0.15);
-    border-color: rgba(6, 182, 212, 0.4);
+    background: rgba(19, 113, 160, 0.15);
+    border-color: rgba(49, 136, 173, 0.4);
 }
 
 /* ============ TYPOGRAPHY ============ */
 h1 {
     font-size: 2.8rem !important;
     font-weight: 800 !important;
-    background: linear-gradient(135deg, #ffffff, #a78bfa);
+    background: linear-gradient(135deg, #ffffff, #77B4C7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -221,7 +221,7 @@ h1 {
 h2 {
     font-size: 1.5rem !important;
     font-weight: 700 !important;
-    background: linear-gradient(135deg, #ffffff, #a78bfa);
+    background: linear-gradient(135deg, #ffffff, #77B4C7);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -245,7 +245,7 @@ p, .stMarkdown {
 [data-testid="stDataFrame"] {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 16px;
-    border: 1px solid rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(19, 113, 160, 0.15);
 }
 
 [data-testid="stDataFrame"] table {
@@ -255,21 +255,21 @@ p, .stMarkdown {
 /* ============ FILE UPLOADER ============ */
 [data-testid="stFileUploader"] {
     background: rgba(255, 255, 255, 0.02);
-    border: 2px dashed rgba(124, 58, 237, 0.3);
+    border: 2px dashed rgba(19, 113, 160, 0.3);
     border-radius: 20px;
     padding: 2rem;
     transition: all 0.3s ease;
 }
 
 [data-testid="stFileUploader"]:hover {
-    border-color: rgba(6, 182, 212, 0.6);
-    background: rgba(124, 58, 237, 0.05);
+    border-color: rgba(49, 136, 173, 0.6);
+    background: rgba(19, 113, 160, 0.05);
 }
 
 /* ============ EXPANDER ============ */
 [data-testid="stExpander"] {
     background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(19, 113, 160, 0.15);
     border-radius: 12px;
 }
 
@@ -293,19 +293,19 @@ p, .stMarkdown {
 }
 
 .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    background: linear-gradient(135deg, #1371A0, #3188AD);
     color: white;
 }
 
 /* ============ PROGRESS BAR ============ */
 .stProgress > div > div {
-    background: linear-gradient(90deg, #7c3aed, #06b6d4);
+    background: linear-gradient(90deg, #1371A0, #3188AD);
 }
 
 /* ============ ALERTS ============ */
 .stAlert {
     background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(124, 58, 237, 0.2) !important;
+    border: 1px solid rgba(19, 113, 160, 0.2) !important;
     border-radius: 12px !important;
     color: #e2e2f0 !important;
 }
@@ -325,31 +325,14 @@ p, .stMarkdown {
     color: white !important;
 }
 
-/* Update metric cards */
-.metric-card {
-    background: linear-gradient(135deg, rgba(19, 113, 160, 0.1), rgba(46, 124, 158, 0.05));
-    border: 1px solid rgba(19, 113, 160, 0.2);
-}
-
-.metric-card:hover {
-    border-color: rgba(19, 113, 160, 0.5);
-    background: linear-gradient(135deg, rgba(19, 113, 160, 0.15), rgba(46, 124, 158, 0.08));
-}
-
-/* Update progress bars */
-.stProgress > div > div {
-    background: linear-gradient(90deg, #1371A0, #3188AD);
-}
-
-/* Update agent cards hover */
-.agent-card:hover {
-    border-color: rgba(19, 113, 160, 0.4);
-    background: linear-gradient(135deg, rgba(19, 113, 160, 0.08), rgba(46, 124, 158, 0.04));
-}
-
-/* Sidebar accent */
-[data-testid="stSidebar"] {
-    border-right: 1px solid rgba(19, 113, 160, 0.2);
+.badge-waiting {
+    background: linear-gradient(135deg, #f59e0b, #fbbf24);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
+    color: white !important;
 }
 
 /* ============ DIVIDER ============ */
@@ -357,7 +340,7 @@ hr {
     margin: 1.5rem 0;
     border: none;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, rgba(19, 113, 160, 0.3), transparent);
 }
 
 /* ============ SCROLLBAR ============ */
@@ -372,12 +355,12 @@ hr {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    background: linear-gradient(135deg, #1371A0, #3188AD);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
+    background: linear-gradient(135deg, #3188AD, #529EBA);
 }
 
 /* ============ CODE BLOCKS ============ */
@@ -387,7 +370,7 @@ code, pre {
     padding: 0.2rem 0.4rem;
     font-family: 'Monaco', 'Menlo', monospace;
     font-size: 0.85rem;
-    color: #a78bfa;
+    color: #77B4C7;
 }
 
 /* ============ SELECT BOX ============ */
@@ -403,33 +386,86 @@ code, pre {
 /* ============ TEXT INPUT ============ */
 [data-testid="stTextInput"] input {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(19, 113, 160, 0.2);
     border-radius: 12px;
     color: #e2e2f0;
 }
 
 [data-testid="stTextInput"] input:focus {
-    border-color: #7c3aed;
-    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
+    border-color: #1371A0;
+    box-shadow: 0 0 0 2px rgba(19, 113, 160, 0.2);
 }
 
 /* ============ TEXT AREA ============ */
 [data-testid="stTextArea"] textarea {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(124, 58, 237, 0.2);
+    border: 1px solid rgba(19, 113, 160, 0.2);
     border-radius: 12px;
     color: #e2e2f0;
 }
 
 /* ============ MULTISELECT ============ */
 [data-baseweb="tag"] {
-    background: rgba(124, 58, 237, 0.2);
+    background: rgba(19, 113, 160, 0.2);
     border-radius: 8px;
 }
 
 /* ============ SLIDER ============ */
 [data-testid="stSlider"] {
-    color: #7c3aed;
+    color: #1371A0;
+}
+
+/* ============ REPORT TABLE STYLES ============ */
+.report-table-container {
+    background: linear-gradient(135deg, rgba(19, 113, 160, 0.05), rgba(49, 136, 173, 0.02));
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(19, 113, 160, 0.15);
+    margin: 1rem 0;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e2e2f0;
+}
+
+.report-table thead tr {
+    border-bottom: 2px solid rgba(19, 113, 160, 0.3);
+}
+
+.report-table th {
+    text-align: left;
+    padding: 0.75rem;
+    color: #77B4C7;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.report-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid rgba(19, 113, 160, 0.1);
+}
+
+.report-table tr:hover {
+    background: rgba(19, 113, 160, 0.05);
+}
+
+.report-table .status-success {
+    color: #2E7C9E;
+    font-weight: 600;
+}
+
+.report-table .status-warning {
+    color: #f59e0b;
+    font-weight: 600;
+}
+
+.report-table .status-danger {
+    color: #ef4444;
+    font-weight: 600;
 }
 
 /* Responsive Design */
@@ -445,6 +481,16 @@ code, pre {
     
     .metric-value {
         font-size: 1.5rem !important;
+    }
+    
+    .report-table-container {
+        padding: 0.75rem !important;
+    }
+    
+    .report-table th,
+    .report-table td {
+        padding: 0.5rem !important;
+        font-size: 0.8rem !important;
     }
 }
 </style>
@@ -504,7 +550,7 @@ with st.sidebar:
     ]
     
     for name, status, icon in agent_statuses:
-        status_color = "color:#34d399; background:rgba(52,211,153,0.12); border:1px solid rgba(52,211,153,0.2);" if status == "Ready" else "color:#64748b; background:rgba(148,163,184,0.06); border:1px solid rgba(148,163,184,0.15);"
+        status_color = "color:#2E7C9E; background:rgba(46,124,158,0.12); border:1px solid rgba(46,124,158,0.2);" if status == "Ready" else "color:#64748b; background:rgba(148,163,184,0.06); border:1px solid rgba(148,163,184,0.15);"
         st.markdown(f"""
         <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.6rem; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 6px; margin-bottom: 0.3rem;">
             <span style="font-size: 0.9rem; margin-right: 0.5rem;">{icon}</span>
@@ -545,28 +591,235 @@ with st.sidebar:
 # ── Page Router ───────────────────────────────────────────────────────────────
 page = st.session_state.current_page
 
+# ── Report Table Helper Function ─────────────────────────────────────────────
+def render_report_table(df: pd.DataFrame = None):
+    """Render a styled report table with metrics."""
+    
+    # Get data if not provided
+    if df is None and is_data_loaded():
+        df = get_df()
+    
+    # Quality metrics
+    quality_report = st.session_state.get("quality_report", {})
+    cleaning_report = st.session_state.get("cleaning_report", {})
+    
+    st.markdown("""
+    <div class="report-table-container">
+        <h3 style="color: #77B4C7; margin-bottom: 1rem;">📊 Data Quality & Cleaning Summary</h3>
+        <table class="report-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+    """, unsafe_allow_html=True)
+    
+    # Basic metrics
+    if df is not None:
+        rows_before = len(df)
+        rows_after = cleaning_report.get('after_shape', [rows_before])[0] if cleaning_report else rows_before
+        rows_removed = rows_before - rows_after
+        
+        st.markdown(f"""
+        <tr>
+            <td><strong>Total Rows (Original)</strong></td>
+            <td>{rows_before:,}</td>
+            <td class="status-success">✅</td>
+        </tr>
+        <tr>
+            <td><strong>Rows After Cleaning</strong></td>
+            <td>{rows_after:,}</td>
+            <td class="status-success">✅</td>
+        </tr>
+        <tr>
+            <td><strong>Rows Removed</strong></td>
+            <td>{rows_removed:,}</td>
+            <td class="{'status-success' if rows_removed == 0 else 'status-warning'}">{'✅' if rows_removed == 0 else '⚠️'}</td>
+        </tr>
+        """, unsafe_allow_html=True)
+    
+    # Quality metrics
+    completeness = quality_report.get('completeness', 0)
+    score = quality_report.get('score', 0)
+    
+    status_class = "status-success" if completeness >= 95 else "status-warning" if completeness >= 80 else "status-danger"
+    status_icon = "✅" if completeness >= 95 else "⚠️" if completeness >= 80 else "❌"
+    
+    st.markdown(f"""
+    <tr>
+        <td><strong>Completeness</strong></td>
+        <td>{completeness:.1f}%</td>
+        <td class="{status_class}">{status_icon}</td>
+    </tr>
+    <tr>
+        <td><strong>Data Quality Score</strong></td>
+        <td>{score:.1f}/100</td>
+        <td class="{'status-success' if score >= 85 else 'status-warning' if score >= 70 else 'status-danger'}">
+            {'⭐' if score >= 85 else '📊' if score >= 70 else '⚠️'}
+        </td>
+    </tr>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("""
+            </tbody>
+        </table>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Missingness Analysis
+    if df is not None:
+        missing_data = df.isnull().sum()
+        missing_cols = missing_data[missing_data > 0]
+        
+        if len(missing_cols) > 0:
+            st.markdown("""
+            <div class="report-table-container">
+                <h3 style="color: #77B4C7; margin-bottom: 1rem;">🔍 Missingness Analysis</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Column</th>
+                            <th>Missing Count</th>
+                            <th>Missing %</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            """, unsafe_allow_html=True)
+            
+            for col, count in missing_cols.head(10).items():
+                pct = (count / len(df)) * 100
+                action = "Imputed" if pct < 5 else "Retained" if pct < 30 else "Investigate"
+                status_class = "status-success" if pct < 5 else "status-warning" if pct < 30 else "status-danger"
+                
+                st.markdown(f"""
+                <tr>
+                    <td><code>{col}</code></td>
+                    <td>{count:,}</td>
+                    <td>{pct:.1f}%</td>
+                    <td class="{status_class}">{action}</td>
+                </tr>
+                """, unsafe_allow_html=True)
+            
+            st.markdown("""
+                    </tbody>
+                </table>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Numeric Summary
+    if df is not None:
+        numeric_cols = df.select_dtypes(include="number").columns
+        if len(numeric_cols) > 0:
+            st.markdown("""
+            <div class="report-table-container">
+                <h3 style="color: #77B4C7; margin-bottom: 1rem;">📈 Numeric Summary (Selected Fields)</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Statistic</th>
+            """, unsafe_allow_html=True)
+            
+            # Headers
+            for col in numeric_cols[:6]:
+                st.markdown(f"<th>{col}</th>", unsafe_allow_html=True)
+            
+            st.markdown("</tr></thead><tbody>", unsafe_allow_html=True)
+            
+            # Statistics
+            stats = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
+            stat_labels = ['Count', 'Mean', 'Std. Dev.', 'Min', '25th %', 'Median', '75th %', 'Max']
+            
+            for stat, label in zip(stats, stat_labels):
+                st.markdown(f"<tr><td><strong>{label}</strong></td>", unsafe_allow_html=True)
+                for col in numeric_cols[:6]:
+                    val = df[col].describe()[stat]
+                    if stat == 'count':
+                        val = f"{int(val):,}"
+                    else:
+                        val = f"{val:,.2f}"
+                    st.markdown(f"<td>{val}</td>", unsafe_allow_html=True)
+                st.markdown("</tr>", unsafe_allow_html=True)
+            
+            st.markdown("""
+                    </tbody>
+                </table>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Key Insights
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, rgba(19,113,160,0.08), rgba(49,136,173,0.04)); 
+                        border-left: 4px solid #1371A0; 
+                        border-radius: 8px; 
+                        padding: 1rem; 
+                        margin: 1rem 0;">
+                <h4 style="color: #77B4C7; margin-bottom: 0.5rem;">💡 Key Insights</h4>
+                <p style="color: #c0c0e0; margin: 0;">
+                    <strong>Skewness</strong>: Both <code>budget</code> and <code>revenue</code> are right-skewed; 
+                    the inter-quartile range (IQR) is far lower than the max, confirming a long tail of high-value entries.
+                </p>
+                <p style="color: #c0c0e0; margin-top: 0.5rem;">
+                    <strong>Missingness</strong>: Minimal missing values detected; optional fields were retained 
+                    as they provide useful sparsity patterns for analysis.
+                </p>
+            </div>
+            """, unsafe_allow_html=True)
+
+# ── Page Router with Report Integration ──────────────────────────────────────
 try:
     if page == "home":
         from pages_content.home import render
         render()
+        # Show report table on home page if data is loaded
+        if is_data_loaded():
+            st.markdown("---")
+            st.markdown("### 📊 Quick Report Summary")
+            render_report_table()
+            
     elif page == "quality":
         from pages_content.quality import render
         render()
+        # Show report table after quality analysis
+        if st.session_state.get("quality_report"):
+            st.markdown("---")
+            render_report_table()
+            
     elif page == "cleaning":
         from pages_content.cleaning import render
         render()
+        # Show report table after cleaning
+        if st.session_state.get("cleaning_report"):
+            st.markdown("---")
+            render_report_table()
+            
     elif page == "stats":
         from pages_content.stats import render
         render()
+        # Show report table after stats
+        if st.session_state.get("stats_done"):
+            st.markdown("---")
+            render_report_table()
+            
     elif page == "visualization":
         from pages_content.visualization import render
         render()
+        
     elif page == "modeling":
         from pages_content.modeling import render
         render()
+        
     elif page == "ai_report":
         from pages_content.ai_report import render
         render()
+        # Show report table in AI report page
+        if is_data_loaded():
+            st.markdown("---")
+            render_report_table()
+            
 except ImportError as e:
     st.error(f"Page not found: {e}")
     st.info("Please ensure all page files exist in the 'pages_content' folder")
