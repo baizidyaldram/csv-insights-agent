@@ -11,14 +11,14 @@ def init_session():
         "quality_report": None,
         "cleaning_report": None,
         "stats_report": None,
-        "insights_text": None,
-        "report_text": None,
+        "ai_report": None,
         "current_page": "home",
         "stats_done": False,
         "viz_done": False,
         # Modeling & Evaluation Agent states
         "model_metrics": None,
         "trained_model": None,
+        "trained_model_name": None,
         "model_features_list": None,
         "model_target_col": None,
         "model_scaler": None,
@@ -26,6 +26,9 @@ def init_session():
         "model_encoded_categories": None,
         "modeling_log": None,
         "modeling_done": False,
+        "model_recommendation": None,
+        "use_cv": False,
+        "cv_folds": 5,
     }
     for key, val in defaults.items():
         if key not in st.session_state:
@@ -41,12 +44,12 @@ def set_df(df: pd.DataFrame, file_name: str = "data.csv"):
     st.session_state.quality_report = None
     st.session_state.cleaning_report = None
     st.session_state.stats_report = None
-    st.session_state.insights_text = None
-    st.session_state.report_text = None
+    st.session_state.ai_report = None
     st.session_state.stats_done = False
     st.session_state.viz_done = False
     st.session_state.model_metrics = None
     st.session_state.trained_model = None
+    st.session_state.trained_model_name = None
     st.session_state.model_features_list = None
     st.session_state.model_target_col = None
     st.session_state.model_scaler = None
@@ -54,6 +57,7 @@ def set_df(df: pd.DataFrame, file_name: str = "data.csv"):
     st.session_state.model_encoded_categories = None
     st.session_state.modeling_log = None
     st.session_state.modeling_done = False
+    st.session_state.model_recommendation = None
 
 
 def get_df(prefer_clean: bool = True) -> pd.DataFrame | None:
