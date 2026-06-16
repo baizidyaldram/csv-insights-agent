@@ -628,9 +628,9 @@ with st.sidebar:
 # ── Page Router ───────────────────────────────────────────────────────────────
 page = st.session_state.current_page
 
-# ── Report Table Helper Function ─────────────────────────────────────────────
+# ── Report Table Helper Function - Only used on AI Report Page ──────────────
 def render_report_table(df: pd.DataFrame = None):
-    """Render a styled report table with metrics - only shown on report page."""
+    """Render a styled report table with metrics - ONLY on AI Report page."""
     
     # Get data if not provided
     if df is None and is_data_loaded():
@@ -831,40 +831,28 @@ def render_report_table(df: pd.DataFrame = None):
         """, unsafe_allow_html=True)
 
 
-# ── Page Router with Report Integration ──────────────────────────────────────
+# ── Page Router - NO report tables on any page except AI Report ─────────────
 try:
     if page == "home":
         from pages_content.home import render
         render()
-        # No report table on home page - keep it clean!
+        # Clean home page - no report tables
         
     elif page == "quality":
         from pages_content.quality import render
         render()
-        # Show report table after quality analysis
-        if st.session_state.get("quality_report"):
-            st.markdown("---")
-            st.markdown("### 📊 Report Summary")
-            render_report_table()
-            
+        # No report table here - keep it clean
+        
     elif page == "cleaning":
         from pages_content.cleaning import render
         render()
-        # Show report table after cleaning
-        if st.session_state.get("cleaning_report"):
-            st.markdown("---")
-            st.markdown("### 📊 Report Summary")
-            render_report_table()
-            
+        # No report table here - keep it clean
+        
     elif page == "stats":
         from pages_content.stats import render
         render()
-        # Show report table after stats
-        if st.session_state.get("stats_done"):
-            st.markdown("---")
-            st.markdown("### 📊 Report Summary")
-            render_report_table()
-            
+        # No report table here - keep it clean
+        
     elif page == "visualization":
         from pages_content.visualization import render
         render()
@@ -876,7 +864,7 @@ try:
     elif page == "ai_report":
         from pages_content.ai_report import render
         render()
-        # Show report table on the AI Report page (this is where it belongs)
+        # ONLY on the AI Report page - show the full report summary
         if is_data_loaded():
             st.markdown("---")
             st.markdown("### 📊 Detailed Report Summary")
