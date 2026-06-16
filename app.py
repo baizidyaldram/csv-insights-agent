@@ -15,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# ── Premium Dark Theme CSS ──────────────────────────────────────────────────
+# ── Premium Dark Theme CSS with Violet-Teal Accent ─────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
@@ -28,9 +28,9 @@ st.markdown("""
     box-sizing: border-box;
 }
 
-/* Premium Dark Gradient Background */
+/* Premium Dark Gradient Background with Violet-Teal */
 .stApp {
-    background: radial-gradient(ellipse at 20% 30%, #1a1a2e, #0a0a15);
+    background: radial-gradient(ellipse at 30% 20%, #1a1a2e, #0b0f1a);
     background-attachment: fixed;
 }
 
@@ -43,9 +43,9 @@ st.markdown("""
     right: 0;
     bottom: 0;
     background-image: 
-        radial-gradient(circle at 10% 20%, rgba(100, 108, 255, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 90% 60%, rgba(167, 139, 250, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, rgba(240, 147, 251, 0.05) 0%, transparent 60%);
+        radial-gradient(circle at 20% 40%, rgba(124, 58, 237, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 60%, rgba(6, 182, 212, 0.12) 0%, transparent 50%),
+        radial-gradient(circle at 50% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 60%);
     pointer-events: none;
     z-index: 0;
 }
@@ -60,7 +60,7 @@ st.markdown("""
     border-radius: 32px;
     margin-top: 1.5rem !important;
     margin-bottom: 1.5rem !important;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.2);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
@@ -69,8 +69,8 @@ st.markdown("""
 
 /* ============ SIDEBAR STYLING ============ */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0f0f1a 0%, #0a0a12 100%);
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    background: linear-gradient(180deg, #12121f 0%, #0a0a14 100%);
+    border-right: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 [data-testid="stSidebar"] * {
@@ -86,7 +86,7 @@ st.markdown("""
 /* Sidebar buttons */
 [data-testid="stSidebar"] .stButton button {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(124, 58, 237, 0.2);
     border-radius: 12px;
     text-align: left;
     padding: 0.7rem 1rem;
@@ -95,22 +95,22 @@ st.markdown("""
 }
 
 [data-testid="stSidebar"] .stButton button:hover {
-    background: rgba(100, 108, 255, 0.15);
-    border-color: rgba(100, 108, 255, 0.4);
+    background: rgba(124, 58, 237, 0.15);
+    border-color: rgba(6, 182, 212, 0.4);
     transform: translateX(4px);
 }
 
 [data-testid="stSidebar"] .stButton button[data-testid="baseButton-primary"] {
-    background: linear-gradient(135deg, #6468ff, #a78bfa);
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
     border: none;
-    box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 /* ============ CARD STYLES ============ */
 .agent-card {
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.2);
     border-radius: 16px;
     padding: 1rem 1.25rem;
     margin-bottom: 0.75rem;
@@ -119,8 +119,8 @@ st.markdown("""
 
 .agent-card:hover {
     transform: translateY(-3px);
-    border-color: rgba(100, 108, 255, 0.4);
-    background: linear-gradient(135deg, rgba(100, 108, 255, 0.08), rgba(167, 139, 250, 0.04));
+    border-color: rgba(6, 182, 212, 0.5);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(6, 182, 212, 0.04));
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
@@ -128,7 +128,7 @@ st.markdown("""
     font-size: 0.95rem;
     font-weight: 700;
     margin-bottom: 0.25rem;
-    background: linear-gradient(135deg, #ffffff, #c4b5fd);
+    background: linear-gradient(135deg, #ffffff, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -142,9 +142,9 @@ st.markdown("""
 
 /* ============ METRIC CARDS ============ */
 .metric-card {
-    background: linear-gradient(135deg, rgba(100, 108, 255, 0.1), rgba(167, 139, 250, 0.05));
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(6, 182, 212, 0.05));
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(100, 108, 255, 0.2);
+    border: 1px solid rgba(124, 58, 237, 0.2);
     border-radius: 20px;
     padding: 1.2rem;
     text-align: center;
@@ -153,14 +153,14 @@ st.markdown("""
 
 .metric-card:hover {
     transform: translateY(-4px);
-    border-color: rgba(100, 108, 255, 0.5);
-    background: linear-gradient(135deg, rgba(100, 108, 255, 0.15), rgba(167, 139, 250, 0.08));
+    border-color: rgba(6, 182, 212, 0.5);
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), rgba(6, 182, 212, 0.08));
 }
 
 .metric-value {
     font-size: 2.2rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff, #c4b5fd);
+    background: linear-gradient(135deg, #ffffff, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -177,39 +177,39 @@ st.markdown("""
 
 /* ============ BUTTON STYLES ============ */
 .stButton > button {
-    background: linear-gradient(135deg, #6468ff, #a78bfa);
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
     color: white;
     border: none;
     border-radius: 14px;
     font-weight: 600;
     padding: 0.6rem 1.5rem;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(100, 108, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 .stButton > button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(100, 108, 255, 0.4);
-    background: linear-gradient(135deg, #7c80ff, #b89bff);
+    box-shadow: 0 8px 20px rgba(124, 58, 237, 0.4);
+    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
 }
 
 /* Secondary button */
 .stButton > button[data-testid="baseButton-secondary"] {
     background: rgba(255, 255, 255, 0.05);
     box-shadow: none;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.2);
 }
 
 .stButton > button[data-testid="baseButton-secondary"]:hover {
-    background: rgba(100, 108, 255, 0.15);
-    border-color: rgba(100, 108, 255, 0.4);
+    background: rgba(124, 58, 237, 0.15);
+    border-color: rgba(6, 182, 212, 0.4);
 }
 
 /* ============ TYPOGRAPHY ============ */
 h1 {
     font-size: 2.8rem !important;
     font-weight: 800 !important;
-    background: linear-gradient(135deg, #ffffff, #c4b5fd);
+    background: linear-gradient(135deg, #ffffff, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -221,7 +221,7 @@ h1 {
 h2 {
     font-size: 1.5rem !important;
     font-weight: 700 !important;
-    background: linear-gradient(135deg, #ffffff, #c4b5fd);
+    background: linear-gradient(135deg, #ffffff, #a78bfa);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -245,7 +245,7 @@ p, .stMarkdown {
 [data-testid="stDataFrame"] {
     background: rgba(0, 0, 0, 0.3);
     border-radius: 16px;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.15);
 }
 
 [data-testid="stDataFrame"] table {
@@ -255,21 +255,21 @@ p, .stMarkdown {
 /* ============ FILE UPLOADER ============ */
 [data-testid="stFileUploader"] {
     background: rgba(255, 255, 255, 0.02);
-    border: 2px dashed rgba(100, 108, 255, 0.3);
+    border: 2px dashed rgba(124, 58, 237, 0.3);
     border-radius: 20px;
     padding: 2rem;
     transition: all 0.3s ease;
 }
 
 [data-testid="stFileUploader"]:hover {
-    border-color: rgba(100, 108, 255, 0.6);
-    background: rgba(100, 108, 255, 0.05);
+    border-color: rgba(6, 182, 212, 0.6);
+    background: rgba(124, 58, 237, 0.05);
 }
 
 /* ============ EXPANDER ============ */
 [data-testid="stExpander"] {
     background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(124, 58, 237, 0.15);
     border-radius: 12px;
 }
 
@@ -293,19 +293,19 @@ p, .stMarkdown {
 }
 
 .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #6468ff, #a78bfa);
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
     color: white;
 }
 
 /* ============ PROGRESS BAR ============ */
 .stProgress > div > div {
-    background: linear-gradient(90deg, #6468ff, #a78bfa);
+    background: linear-gradient(90deg, #7c3aed, #06b6d4);
 }
 
 /* ============ ALERTS ============ */
 .stAlert {
     background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border: 1px solid rgba(124, 58, 237, 0.2) !important;
     border-radius: 12px !important;
     color: #e2e2f0 !important;
 }
@@ -340,7 +340,7 @@ hr {
     margin: 1.5rem 0;
     border: none;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.3), transparent);
 }
 
 /* ============ SCROLLBAR ============ */
@@ -355,12 +355,12 @@ hr {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #6468ff, #a78bfa);
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #7c80ff, #b89bff);
+    background: linear-gradient(135deg, #8b5cf6, #22d3ee);
 }
 
 /* ============ CODE BLOCKS ============ */
@@ -370,7 +370,7 @@ code, pre {
     padding: 0.2rem 0.4rem;
     font-family: 'Monaco', 'Menlo', monospace;
     font-size: 0.85rem;
-    color: #c4b5fd;
+    color: #a78bfa;
 }
 
 /* ============ SELECT BOX ============ */
@@ -386,33 +386,33 @@ code, pre {
 /* ============ TEXT INPUT ============ */
 [data-testid="stTextInput"] input {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.2);
     border-radius: 12px;
     color: #e2e2f0;
 }
 
 [data-testid="stTextInput"] input:focus {
-    border-color: #6468ff;
-    box-shadow: 0 0 0 2px rgba(100, 108, 255, 0.2);
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.2);
 }
 
 /* ============ TEXT AREA ============ */
 [data-testid="stTextArea"] textarea {
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.2);
     border-radius: 12px;
     color: #e2e2f0;
 }
 
 /* ============ MULTISELECT ============ */
 [data-baseweb="tag"] {
-    background: rgba(100, 108, 255, 0.2);
+    background: rgba(124, 58, 237, 0.2);
     border-radius: 8px;
 }
 
 /* ============ SLIDER ============ */
 [data-testid="stSlider"] {
-    color: #6468ff;
+    color: #7c3aed;
 }
 
 /* Responsive Design */
@@ -449,8 +449,7 @@ with st.sidebar:
         "📊 Statistical Analysis": "stats",
         "📈 Visualization": "visualization",
         "🤖 Modeling & Evaluation": "modeling",
-        "💡 AI Insights": "insights",
-        "📄 Report": "report",
+        "📋 AI Insights & Report": "ai_report",
     }
     
     if "current_page" not in st.session_state:
@@ -475,8 +474,7 @@ with st.sidebar:
     stats_ready = st.session_state.get("stats_done", False)
     viz_ready = st.session_state.get("viz_done", False)
     modeling_ready = st.session_state.get("modeling_done", False)
-    insights_ready = st.session_state.get("insights_text") is not None
-    report_ready = st.session_state.get("report_text") is not None
+    report_ready = st.session_state.get("ai_report") is not None
     
     agent_statuses = [
         ("System Orchestrator", "Ready", "⚡"),
@@ -485,8 +483,7 @@ with st.sidebar:
         ("Statistical Agent", "Ready" if stats_ready else "Waiting", "📊"),
         ("Visuals Agent", "Ready" if viz_ready else "Waiting", "📈"),
         ("Modeling Agent", "Ready" if modeling_ready else "Waiting", "🤖"),
-        ("Insights Agent", "Ready" if insights_ready else "Waiting", "💡"),
-        ("Report Agent", "Ready" if report_ready else "Waiting", "📄"),
+        ("AI Insights & Report", "Ready" if report_ready else "Waiting", "📋"),
     ]
     
     for name, status, icon in agent_statuses:
@@ -550,11 +547,8 @@ try:
     elif page == "modeling":
         from pages_content.modeling import render
         render()
-    elif page == "insights":
-        from pages_content.insights import render
-        render()
-    elif page == "report":
-        from pages_content.report import render
+    elif page == "ai_report":
+        from pages_content.ai_report import render
         render()
 except ImportError as e:
     st.error(f"Page not found: {e}")
