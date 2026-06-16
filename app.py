@@ -415,7 +415,7 @@ code, pre {
     color: #1371A0;
 }
 
-/* ============ REPORT TABLE STYLES - FIXED ============ */
+/* ============ REPORT TABLE STYLES ============ */
 .report-table-container {
     background: linear-gradient(135deg, rgba(19, 113, 160, 0.05), rgba(49, 136, 173, 0.02));
     border-radius: 16px;
@@ -498,6 +498,25 @@ code, pre {
 .report-table .col-action { width: 10%; }
 .report-table .col-stat { width: 15%; }
 .report-table .col-numeric { width: auto; }
+
+/* Insights box */
+.insights-box {
+    background: linear-gradient(135deg, rgba(19,113,160,0.08), rgba(49,136,173,0.04));
+    border-left: 4px solid #1371A0;
+    border-radius: 8px;
+    padding: 1rem;
+    margin: 1rem 0;
+}
+
+.insights-box h4 {
+    color: #77B4C7;
+    margin-bottom: 0.5rem;
+}
+
+.insights-box p {
+    color: #c0c0e0;
+    margin: 0.25rem 0;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
@@ -622,9 +641,9 @@ with st.sidebar:
 # ── Page Router ───────────────────────────────────────────────────────────────
 page = st.session_state.current_page
 
-# ── Report Table Helper Function - COMPLETELY REWRITTEN ─────────────────────
+# ── Report Table Helper Function - FIXED HTML RENDERING ─────────────────────
 def render_report_table(df: pd.DataFrame = None):
-    """Render a styled report table with metrics - FIXED ALIGNMENT."""
+    """Render a styled report table with metrics - FIXED for proper HTML rendering."""
     
     # Get data if not provided
     if df is None and is_data_loaded():
@@ -651,11 +670,10 @@ def render_report_table(df: pd.DataFrame = None):
     rows_after = cleaning_report.get('after_shape', [rows_before])[0] if cleaning_report else rows_before
     rows_removed = rows_before - rows_after
     
-    # ── Build HTML table string directly ──
-    html_parts = []
+    # ── Use st.markdown with proper HTML ──
     
     # Quality Summary Table
-    html_parts.append("""
+    st.markdown(f"""
     <div class="report-table-container">
         <h3 style="color: #77B4C7; margin-bottom: 1rem;">📊 Data Quality & Cleaning Summary</h3>
         <table class="report-table">
@@ -667,25 +685,22 @@ def render_report_table(df: pd.DataFrame = None):
                 </tr>
             </thead>
             <tbody>
-    """)
-    
-    html_parts.append(f"""
-        <tr>
-            <td><strong>Total Rows (Original)</strong></td>
-            <td>{rows_before:,}</td>
-            <td class="status-success">✅</td>
-        </tr>
-        <tr>
-            <td><strong>Rows After Cleaning</strong></td>
-            <td>{rows_after:,}</td>
-            <td class="status-success">✅</td>
-        </tr>
-        <tr>
-            <td><strong>Rows Removed</strong></td>
-            <td>{rows_removed:,}</td>
-            <td class="{'status-success' if rows_removed == 0 else 'status-warning'}">{'✅' if rows_removed == 0 else '⚠️'}</td>
-        </tr>
-    """)
+                <tr>
+                    <td><strong>Total Rows (Original)</strong></td>
+                    <td>{rows_before:,}</td>
+                    <td class="status-success">✅</td>
+                </tr>
+                <tr>
+                    <td><strong>Rows After Cleaning</strong></td>
+                    <td>{rows_after:,}</td>
+                    <td class="status-success">✅</td>
+                </tr>
+                <tr>
+                    <td><strong>Rows Removed</strong></td>
+                    <td>{rows_removed:,}</td>
+                    <td class="{'status-success' if rows_removed == 0 else 'status-warning'}">{'✅' if rows_removed == 0 else '⚠️'}</td>
+                </tr>
+    """, unsafe_allow_html=True)
     
     if completeness > 0 or score > 0:
         status_class = "status-success" if completeness >= 95 else "status-warning" if completeness >= 80 else "status-danger"
@@ -693,31 +708,31 @@ def render_report_table(df: pd.DataFrame = None):
         score_class = "status-success" if score >= 85 else "status-warning" if score >= 70 else "status-danger"
         score_icon = "⭐" if score >= 85 else "📊" if score >= 70 else "⚠️"
         
-        html_parts.append(f"""
-        <tr>
-            <td><strong>Completeness</strong></td>
-            <td>{completeness:.1f}%</td>
-            <td class="{status_class}">{status_icon}</td>
-        </tr>
-        <tr>
-            <td><strong>Data Quality Score</strong></td>
-            <td>{score:.1f}/100</td>
-            <td class="{score_class}">{score_icon}</td>
-        </tr>
-        """)
+        st.markdown(f"""
+                <tr>
+                    <td><strong>Completeness</strong></td>
+                    <td>{completeness:.1f}%</td>
+                    <td class="{status_class}">{status_icon}</td>
+                </tr>
+                <tr>
+                    <td><strong>Data Quality Score</strong></td>
+                    <td>{score:.1f}/100</td>
+                    <td class="{score_class}">{score_icon}</td>
+                </tr>
+        """, unsafe_allow_html=True)
     
-    html_parts.append("""
+    st.markdown("""
             </tbody>
         </table>
     </div>
-    """)
+    """, unsafe_allow_html=True)
     
     # ── Missingness Analysis ──
     missing_data = df.isnull().sum()
     missing_cols = missing_data[missing_data > 0]
     
     if len(missing_cols) > 0:
-        html_parts.append("""
+        st.markdown("""
         <div class="report-table-container">
             <h3 style="color: #77B4C7; margin-bottom: 1rem;">🔍 Missingness Analysis</h3>
             <table class="report-table">
@@ -730,7 +745,7 @@ def render_report_table(df: pd.DataFrame = None):
                     </tr>
                 </thead>
                 <tbody>
-        """)
+        """, unsafe_allow_html=True)
         
         for col, count in missing_cols.head(10).items():
             pct = (count / len(df)) * 100
@@ -744,40 +759,41 @@ def render_report_table(df: pd.DataFrame = None):
                 action = "Investigate"
                 status_class = "status-danger"
             
-            html_parts.append(f"""
+            st.markdown(f"""
             <tr>
                 <td><code>{col}</code></td>
                 <td>{count:,}</td>
                 <td>{pct:.1f}%</td>
                 <td class="{status_class}">{action}</td>
             </tr>
-            """)
+            """, unsafe_allow_html=True)
         
-        html_parts.append("""
+        st.markdown("""
                 </tbody>
             </table>
         </div>
-        """)
+        """, unsafe_allow_html=True)
     
     # ── Numeric Summary ──
     numeric_cols = df.select_dtypes(include="number").columns
     if len(numeric_cols) > 0:
         display_cols = numeric_cols[:6]
         
-        html_parts.append("""
+        # Build table header
+        header_html = """
         <div class="report-table-container">
             <h3 style="color: #77B4C7; margin-bottom: 1rem;">📈 Numeric Summary</h3>
             <table class="report-table">
                 <thead>
                     <tr>
                         <th class="col-stat">Statistic</th>
-        """)
+        """
         
-        # Add column headers
         for col in display_cols:
-            html_parts.append(f"<th class='col-numeric'>{col}</th>")
+            header_html += f"<th class='col-numeric'>{col}</th>"
         
-        html_parts.append("</tr></thead><tbody>")
+        header_html += "</tr></thead><tbody>"
+        st.markdown(header_html, unsafe_allow_html=True)
         
         # Add statistics rows
         try:
@@ -795,7 +811,7 @@ def render_report_table(df: pd.DataFrame = None):
             ]
             
             for stat, label in stats_to_display:
-                html_parts.append(f"<tr><td><strong>{label}</strong></td>")
+                row_html = f"<tr><td><strong>{label}</strong></td>"
                 for col in display_cols:
                     try:
                         val = desc_df.loc[stat, col]
@@ -805,41 +821,29 @@ def render_report_table(df: pd.DataFrame = None):
                             val_str = f"{val:,.2f}"
                     except:
                         val_str = "—"
-                    html_parts.append(f"<td>{val_str}</td>")
-                html_parts.append("</tr>")
+                    row_html += f"<td>{val_str}</td>"
+                row_html += "</tr>"
+                st.markdown(row_html, unsafe_allow_html=True)
                 
         except Exception as e:
-            html_parts.append(f"<tr><td colspan='{len(display_cols)+1}'>Error: {str(e)}</td></tr>")
+            st.markdown(f"<tr><td colspan='{len(display_cols)+1}'>Error: {str(e)}</td></tr>", unsafe_allow_html=True)
         
-        html_parts.append("""
+        st.markdown("""
                 </tbody>
             </table>
         </div>
-        """)
+        """, unsafe_allow_html=True)
         
         # ── Key Insights ──
-        html_parts.append(f"""
-        <div style="background: linear-gradient(135deg, rgba(19,113,160,0.08), rgba(49,136,173,0.04)); 
-                    border-left: 4px solid #1371A0; 
-                    border-radius: 8px; 
-                    padding: 1rem; 
-                    margin: 1rem 0;">
-            <h4 style="color: #77B4C7; margin-bottom: 0.5rem;">💡 Key Insights</h4>
-            <p style="color: #c0c0e0; margin: 0;">
-                <strong>Dataset Overview</strong>: {df.shape[0]:,} rows × {df.shape[1]} columns with 
-                {len(numeric_cols)} numeric features and {len(df.select_dtypes(include='object').columns)} categorical features.
-            </p>
-            <p style="color: #c0c0e0; margin-top: 0.5rem;">
-                <strong>Data Quality</strong>: {completeness:.1f}% completeness with a quality score of {score:.1f}/100.
-            </p>
-            <p style="color: #c0c0e0; margin-top: 0.5rem;">
-                <strong>Memory Usage</strong>: {df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB
-            </p>
+        st.markdown(f"""
+        <div class="insights-box">
+            <h4>💡 Key Insights</h4>
+            <p><strong>Dataset Overview</strong>: {df.shape[0]:,} rows × {df.shape[1]} columns with 
+            {len(numeric_cols)} numeric features and {len(df.select_dtypes(include='object').columns)} categorical features.</p>
+            <p><strong>Data Quality</strong>: {completeness:.1f}% completeness with a quality score of {score:.1f}/100.</p>
+            <p><strong>Memory Usage</strong>: {df.memory_usage(deep=True).sum() / 1024 / 1024:.2f} MB</p>
         </div>
-        """)
-    
-    # Render all HTML at once
-    st.markdown("\n".join(html_parts), unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 
 # ── Page Router with Report Integration ──────────────────────────────────────
