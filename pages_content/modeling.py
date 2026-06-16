@@ -17,7 +17,7 @@ from sklearn.metrics import (
 from utils.session import get_df, is_data_loaded
 from utils.llm import call_llm
 
-# Try to import optional libraries
+# Try to import optional libraries with proper error handling
 try:
     import xgboost as xgb
     XGB_AVAILABLE = True
@@ -197,6 +197,116 @@ def render():
         display_results(task_type)
 
 
+def get_model_instance(model_name, task_type, random_state):
+    """Get model instance with default parameters - with error handling."""
+    try:
+        if task_type == "classification":
+            if model_name == "Random Forest":
+                return RandomForestClassifier(
+                    n_estimators=100,
+                    random_state=random_state,
+                    n_jobs=-1
+                )
+            elif model_name == "Gradient Boosting":
+                return GradientBoostingClassifier(
+                    n_estimators=100,
+                    learning_rate=0.1,
+                    random_state=random_state
+                )
+            elif model_name == "Logistic Regression":
+                return LogisticRegression(
+                    random_state=random_state,
+                    max_iter=1000,
+                    solver='lbfgs'
+                )
+            elif model_name == "Decision Tree":
+                return DecisionTreeClassifier(
+                    max_depth=10,
+                    random_state=random_state
+                )
+            elif model_name == "XGBoost" and XGB_AVAILABLE:
+                try:
+                    return xgb.XGBClassifier(
+                        n_estimators=100,
+                        learning_rate=0.1,
+                        max_depth=6,
+                        random_state=random_state,
+                        eval_metric='logloss',
+                        use_label_encoder=False
+                    )
+                except:
+                    # Fallback with simpler parameters if the above fails
+                    return xgb.XGBClassifier(
+                        n_estimators=100,
+                        random_state=random_state
+                    )
+            elif model_name == "LightGBM" and LGB_AVAILABLE:
+                try:
+                    return lgb.LGBMClassifier(
+                        n_estimators=100,
+                        learning_rate=0.1,
+                        random_state=random_state,
+                        verbose=-1
+                    )
+                except:
+                    return lgb.LGBMClassifier(
+                        n_estimators=100,
+                        random_state=random_state,
+                        verbose=-1
+                    )
+        else:  # regression
+            if model_name == "Random Forest":
+                return RandomForestRegressor(
+                    n_estimators=100,
+                    random_state=random_state,
+                    n_jobs=-1
+                )
+            elif model_name == "Gradient Boosting":
+                return GradientBoostingRegressor(
+                    n_estimators=100,
+                    learning_rate=0.1,
+                    random_state=random_state
+                )
+            elif model_name == "Linear Regression":
+                return LinearRegression()
+            elif model_name == "Ridge Regression":
+                return Ridge(
+                    alpha=1.0,
+                    random_state=random_state
+                )
+            elif model_name == "XGBoost" and XGB_AVAILABLE:
+                try:
+                    return xgb.XGBRegressor(
+                        n_estimators=100,
+                        learning_rate=0.1,
+                        max_depth=6,
+                        random_state=random_state
+                    )
+                except:
+                    return xgb.XGBRegressor(
+                        n_estimators=100,
+                        random_state=random_state
+                    )
+            elif model_name == "LightGBM" and LGB_AVAILABLE:
+                try:
+                    return lgb.LGBMRegressor(
+                        n_estimators=100,
+                        learning_rate=0.1,
+                        random_state=random_state,
+                        verbose=-1
+                    )
+                except:
+                    return lgb.LGBMRegressor(
+                        n_estimators=100,
+                        random_state=random_state,
+                        verbose=-1
+                    )
+    except Exception as e:
+        st.warning(f"⚠️ Could not load {model_name}: {str(e)}")
+        return None
+    return None
+
+
 def run_training(df, target_col, features_list, task_type, selected_model_names, available_models, 
                  test_size, random_state, scaling_method, cv_folds, handle_imbalance, use_cv):
     
@@ -245,20 +355,27 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
     numeric_cols = X_train.select_dtypes(include="number").columns.tolist()
     if scaling_method != "None" and len(numeric_cols) > 0:
         log_step(f"Applying {scaling_method} scaling...")
-        if scaling_method == "StandardScaler":
-            scaler = StandardScaler()
-        elif scaling_method == "MinMaxScaler":
-            scaler = MinMaxScaler()
-        
-        X_train[numeric_cols] = scaler.fit_transform(X_train[numeric_cols])
-        X_test[numeric_cols] = scaler.transform(X_test[numeric_cols])
+        try:
+            if scaling_method == "StandardScaler":
+                scaler = StandardScaler()
+            elif scaling_method == "MinMaxScaler":
+                scaler = MinMaxScaler()
+            
+            X_train[numeric_cols] = scaler.fit_transform(X_train[numeric_cols])
+            X_test[numeric_cols] = scaler.transform(X_test[numeric_cols])
+        except Exception as e:
+            log_step(f"⚠️ Scaling failed: {str(e)}")
+            scaler = None
     
     # 6. SMOTE for imbalance
     if handle_imbalance and task_type == "classification" and SMOTE_AVAILABLE:
-        log_step("Applying SMOTE for class imbalance...")
-        smote = SMOTE(random_state=random_state)
-        X_train, y_train = smote.fit_resample(X_train, y_train)
-        log_step(f"After SMOTE: {len(X_train)} rows")
+        try:
+            log_step("Applying SMOTE for class imbalance...")
+            smote = SMOTE(random_state=random_state)
+            X_train, y_train = smote.fit_resample(X_train, y_train)
+            log_step(f"After SMOTE: {len(X_train)} rows")
+        except Exception as e:
+            log_step(f"⚠️ SMOTE failed: {str(e)}")
     
     # 7. Train models
     metrics_report = {}
@@ -276,124 +393,112 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
             log_step(f"⚠️ {model_name} not available, skipping...")
             continue
         
-        # Fit model
-        model.fit(X_train, y_train)
-        trained_models[model_name] = model
-        
-        # Predict
-        y_pred = model.predict(X_test)
-        
-        # Calculate metrics
-        model_metrics = calculate_metrics(y_test, y_pred, task_type, model, X_test)
-        
-        # Cross-validation score (optional)
-        if use_cv:
-            try:
-                cv_scores = cross_val_score(model, X_train, y_train, cv=min(cv_folds, 3), 
-                                            scoring='accuracy' if task_type == 'classification' else 'r2')
-                model_metrics["cv_mean"] = cv_scores.mean()
-                model_metrics["cv_std"] = cv_scores.std()
-            except:
-                model_metrics["cv_mean"] = None
-                model_metrics["cv_std"] = None
-        
-        metrics_report[model_name] = model_metrics
-        log_step(f"✓ {model_name} complete")
+        try:
+            # Fit model
+            model.fit(X_train, y_train)
+            trained_models[model_name] = model
+            
+            # Predict
+            y_pred = model.predict(X_test)
+            
+            # Calculate metrics
+            model_metrics = calculate_metrics(y_test, y_pred, task_type, model, X_test)
+            
+            # Cross-validation score (optional)
+            if use_cv:
+                try:
+                    cv_scores = cross_val_score(model, X_train, y_train, cv=min(cv_folds, 3), 
+                                                scoring='accuracy' if task_type == 'classification' else 'r2')
+                    model_metrics["cv_mean"] = cv_scores.mean()
+                    model_metrics["cv_std"] = cv_scores.std()
+                except Exception as e:
+                    log_step(f"⚠️ CV failed for {model_name}: {str(e)}")
+            
+            metrics_report[model_name] = model_metrics
+            log_step(f"✓ {model_name} complete")
+            
+        except Exception as e:
+            log_step(f"❌ {model_name} failed: {str(e)}")
+            continue
         
         # Show progress
         with console_ph.container():
             st.markdown("#### 🪵 Training Log")
-            st.code("\n".join(st.session_state.modeling_log[-10:]), language="text")
+            log_text = "\n".join(st.session_state.modeling_log[-10:])
+            st.code(log_text, language="text")
     
     # 8. Find best model
     if metrics_report:
-        metric_key = "Accuracy" if task_type == "classification" else "R2 Score"
-        best_model_name = max(metrics_report.items(), key=lambda x: x[1].get(metric_key, -np.inf))[0]
-        best_model = trained_models[best_model_name]
-        
-        st.session_state.model_metrics = metrics_report
-        st.session_state.trained_model = best_model
-        st.session_state.trained_model_name = best_model_name
-        st.session_state.model_features_list = features_list
-        st.session_state.model_target_col = target_col
-        st.session_state.model_scaler = scaler
-        st.session_state.model_task_type = task_type
-        st.session_state.model_encoded_categories = cat_mappings
-        st.session_state.model_target_inverse_mapping = y_inverse_mapping
-        st.session_state.modeling_done = True
-        
-        # Generate AI recommendation
-        with st.spinner("🧠 Generating AI model recommendation..."):
-            recommendation = generate_ai_recommendation(metrics_report, task_type, features_list, len(df_clean), best_model_name)
-            st.session_state.model_recommendation = recommendation
-        
-        log_step(f"🏆 Best model: {best_model_name}")
-        st.success(f"✅ Modeling complete! Best model: {best_model_name}")
+        try:
+            metric_key = "Accuracy" if task_type == "classification" else "R2 Score"
+            best_model_name = max(metrics_report.items(), key=lambda x: x[1].get(metric_key, -np.inf))[0]
+            best_model = trained_models.get(best_model_name)
+            
+            if best_model is not None:
+                st.session_state.model_metrics = metrics_report
+                st.session_state.trained_model = best_model
+                st.session_state.trained_model_name = best_model_name
+                st.session_state.model_features_list = features_list
+                st.session_state.model_target_col = target_col
+                st.session_state.model_scaler = scaler
+                st.session_state.model_task_type = task_type
+                st.session_state.model_encoded_categories = cat_mappings
+                st.session_state.model_target_inverse_mapping = y_inverse_mapping
+                st.session_state.modeling_done = True
+                
+                # Generate AI recommendation
+                try:
+                    with st.spinner("🧠 Generating AI model recommendation..."):
+                        recommendation = generate_ai_recommendation(metrics_report, task_type, features_list, len(df_clean), best_model_name)
+                        st.session_state.model_recommendation = recommendation
+                except Exception as e:
+                    st.session_state.model_recommendation = f"⚠️ Could not generate recommendation: {str(e)}"
+                
+                log_step(f"🏆 Best model: {best_model_name}")
+                st.success(f"✅ Modeling complete! Best model: {best_model_name}")
+            else:
+                st.error("Best model could not be loaded.")
+        except Exception as e:
+            st.error(f"Error selecting best model: {str(e)}")
     else:
-        st.error("No models were successfully trained.")
-
-
-def get_model_instance(model_name, task_type, random_state):
-    """Get model instance with default parameters."""
-    try:
-        if task_type == "classification":
-            if model_name == "Random Forest":
-                return RandomForestClassifier(random_state=random_state, n_jobs=-1)
-            elif model_name == "Gradient Boosting":
-                return GradientBoostingClassifier(random_state=random_state)
-            elif model_name == "Logistic Regression":
-                return LogisticRegression(random_state=random_state, max_iter=1000)
-            elif model_name == "Decision Tree":
-                return DecisionTreeClassifier(random_state=random_state)
-            elif model_name == "XGBoost" and XGB_AVAILABLE:
-                return xgb.XGBClassifier(random_state=random_state, eval_metric='logloss', use_label_encoder=False)
-            elif model_name == "LightGBM" and LGB_AVAILABLE:
-                return lgb.LGBMClassifier(random_state=random_state, verbose=-1)
-        else:
-            if model_name == "Random Forest":
-                return RandomForestRegressor(random_state=random_state, n_jobs=-1)
-            elif model_name == "Gradient Boosting":
-                return GradientBoostingRegressor(random_state=random_state)
-            elif model_name == "Linear Regression":
-                return LinearRegression()
-            elif model_name == "Ridge Regression":
-                return Ridge(random_state=random_state)
-            elif model_name == "XGBoost" and XGB_AVAILABLE:
-                return xgb.XGBRegressor(random_state=random_state)
-            elif model_name == "LightGBM" and LGB_AVAILABLE:
-                return lgb.LGBMRegressor(random_state=random_state, verbose=-1)
-    except Exception as e:
-        st.warning(f"Could not load {model_name}: {str(e)}")
-        return None
-    return None
+        st.error("No models were successfully trained. Please check the logs above for details.")
 
 
 def calculate_metrics(y_test, y_pred, task_type, model, X_test):
     """Calculate comprehensive metrics."""
     metrics = {}
     
-    if task_type == "classification":
-        metrics["Accuracy"] = accuracy_score(y_test, y_pred)
-        metrics["Precision"] = precision_score(y_test, y_pred, average="weighted", zero_division=0)
-        metrics["Recall"] = recall_score(y_test, y_pred, average="weighted", zero_division=0)
-        metrics["F1-Score"] = f1_score(y_test, y_pred, average="weighted", zero_division=0)
-        
-        # Confusion matrix
-        cm = confusion_matrix(y_test, y_pred)
-        metrics["confusion_matrix"] = cm.tolist()
-    else:
-        metrics["R2 Score"] = r2_score(y_test, y_pred)
-        metrics["MAE"] = mean_absolute_error(y_test, y_pred)
-        metrics["MSE"] = mean_squared_error(y_test, y_pred)
-        metrics["RMSE"] = np.sqrt(metrics["MSE"])
+    try:
+        if task_type == "classification":
+            metrics["Accuracy"] = accuracy_score(y_test, y_pred)
+            metrics["Precision"] = precision_score(y_test, y_pred, average="weighted", zero_division=0)
+            metrics["Recall"] = recall_score(y_test, y_pred, average="weighted", zero_division=0)
+            metrics["F1-Score"] = f1_score(y_test, y_pred, average="weighted", zero_division=0)
+            
+            # Confusion matrix
+            cm = confusion_matrix(y_test, y_pred)
+            metrics["confusion_matrix"] = cm.tolist()
+        else:
+            metrics["R2 Score"] = r2_score(y_test, y_pred)
+            metrics["MAE"] = mean_absolute_error(y_test, y_pred)
+            metrics["MSE"] = mean_squared_error(y_test, y_pred)
+            metrics["RMSE"] = np.sqrt(metrics["MSE"])
+    except Exception as e:
+        st.warning(f"Error calculating metrics: {str(e)}")
     
     # Feature importance
-    if hasattr(model, "feature_importances_"):
-        metrics["feature_importances"] = model.feature_importances_.tolist()
+    try:
+        if hasattr(model, "feature_importances_"):
+            metrics["feature_importances"] = model.feature_importances_.tolist()
+    except:
+        pass
     
     # Store predictions
-    metrics["y_test"] = y_test.tolist()[:100]  # Limit for display
-    metrics["y_pred"] = y_pred.tolist()[:100]
+    try:
+        metrics["y_test"] = y_test.tolist()[:100]
+        metrics["y_pred"] = y_pred.tolist()[:100]
+    except:
+        pass
     
     return metrics
 
@@ -518,42 +623,47 @@ def create_model_comparison_chart(metrics_dict: dict, task_type: str):
 def create_feature_importance_chart(feature_importances, features_list, top_n: int = 10):
     """Create horizontal bar chart for feature importance."""
     
-    if not feature_importances:
+    if not feature_importances or not features_list:
         return None
     
     # Handle both dict and list formats
-    if isinstance(feature_importances, list):
-        importances_dict = dict(zip(features_list, feature_importances))
-    else:
-        importances_dict = feature_importances
-    
-    sorted_features = sorted(importances_dict.items(), key=lambda x: x[1], reverse=True)[:top_n]
-    
-    df_importance = pd.DataFrame(sorted_features, columns=["Feature", "Importance"])
-    
-    fig = px.bar(
-        df_importance,
-        x="Importance",
-        y="Feature",
-        orientation="h",
-        title=f"Top {top_n} Feature Importances",
-        labels={"Importance": "Importance Score", "Feature": ""},
-        color="Importance",
-        color_continuous_scale="Viridis",
-        text_auto='.3f'
-    )
-    
-    fig.update_layout(
-        template="plotly_dark",
-        height=400,
-        yaxis=dict(categoryorder="total ascending"),
-        plot_bgcolor="rgba(0,0,0,0.2)",
-        coloraxis_showscale=False
-    )
-    
-    fig.update_traces(marker_line_width=0)
-    
-    return fig
+    try:
+        if isinstance(feature_importances, list):
+            # Ensure we have the right length
+            min_len = min(len(features_list), len(feature_importances))
+            importances_dict = dict(zip(features_list[:min_len], feature_importances[:min_len]))
+        else:
+            importances_dict = feature_importances
+        
+        sorted_features = sorted(importances_dict.items(), key=lambda x: x[1], reverse=True)[:top_n]
+        
+        df_importance = pd.DataFrame(sorted_features, columns=["Feature", "Importance"])
+        
+        fig = px.bar(
+            df_importance,
+            x="Importance",
+            y="Feature",
+            orientation="h",
+            title=f"Top {top_n} Feature Importances",
+            labels={"Importance": "Importance Score", "Feature": ""},
+            color="Importance",
+            color_continuous_scale="Viridis",
+            text_auto='.3f'
+        )
+        
+        fig.update_layout(
+            template="plotly_dark",
+            height=400,
+            yaxis=dict(categoryorder="total ascending"),
+            plot_bgcolor="rgba(0,0,0,0.2)",
+            coloraxis_showscale=False
+        )
+        
+        fig.update_traces(marker_line_width=0)
+        
+        return fig
+    except Exception as e:
+        return None
 
 
 def create_confusion_matrix_heatmap(cm_matrix):
@@ -562,22 +672,25 @@ def create_confusion_matrix_heatmap(cm_matrix):
     if not cm_matrix:
         return None
     
-    fig = px.imshow(
-        cm_matrix,
-        text_auto=True,
-        title="Confusion Matrix",
-        labels=dict(x="Predicted", y="Actual", color="Count"),
-        color_continuous_scale="Blues",
-        aspect="auto"
-    )
-    
-    fig.update_layout(
-        template="plotly_dark",
-        height=450,
-        plot_bgcolor="rgba(0,0,0,0.2)"
-    )
-    
-    return fig
+    try:
+        fig = px.imshow(
+            cm_matrix,
+            text_auto=True,
+            title="Confusion Matrix",
+            labels=dict(x="Predicted", y="Actual", color="Count"),
+            color_continuous_scale="Blues",
+            aspect="auto"
+        )
+        
+        fig.update_layout(
+            template="plotly_dark",
+            height=450,
+            plot_bgcolor="rgba(0,0,0,0.2)"
+        )
+        
+        return fig
+    except Exception as e:
+        return None
 
 
 def display_results(task_type):
@@ -597,7 +710,7 @@ def display_results(task_type):
         for model_name, data in metrics.items():
             row = {"Model": model_name}
             for metric, val in data.items():
-                if isinstance(val, (int, float)):
+                if isinstance(val, (int, float)) and metric not in ["confusion_matrix"]:
                     row[metric] = round(val, 4)
             comparison_data.append(row)
         
@@ -639,7 +752,6 @@ def display_results(task_type):
         st.markdown("#### 🤖 AI Model Recommendation")
         if st.session_state.get("model_recommendation"):
             recommendation = st.session_state.model_recommendation
-            # Format the recommendation for display
             st.markdown(recommendation)
         else:
             st.info("AI recommendation not available. Click 'Run Modeling' again to generate.")
@@ -647,7 +759,7 @@ def display_results(task_type):
     with tab4:
         st.markdown("#### Best Model Details")
         
-        best_metrics = metrics[best_model_name]
+        best_metrics = metrics.get(best_model_name, {})
         
         if task_type == "classification":
             col1, col2, col3, col4 = st.columns(4)
