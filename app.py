@@ -415,7 +415,7 @@ code, pre {
     color: #1371A0;
 }
 
-/* ============ REPORT TABLE STYLES ============ */
+/* ============ REPORT TABLE STYLES - FIXED ALIGNMENT ============ */
 .report-table-container {
     background: linear-gradient(135deg, rgba(19, 113, 160, 0.05), rgba(49, 136, 173, 0.02));
     border-radius: 16px;
@@ -430,6 +430,7 @@ code, pre {
     border-collapse: collapse;
     color: #e2e2f0;
     font-size: 0.9rem;
+    table-layout: fixed;
 }
 
 .report-table thead tr {
@@ -438,19 +439,21 @@ code, pre {
 
 .report-table th {
     text-align: left;
-    padding: 0.75rem 0.5rem;
+    padding: 0.75rem 0.75rem;
     color: #77B4C7;
     font-weight: 600;
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     white-space: nowrap;
+    border-bottom: 2px solid rgba(19, 113, 160, 0.2);
 }
 
 .report-table td {
-    padding: 0.65rem 0.5rem;
+    padding: 0.65rem 0.75rem;
     border-bottom: 1px solid rgba(19, 113, 160, 0.08);
     vertical-align: middle;
+    word-wrap: break-word;
 }
 
 .report-table tbody tr:hover {
@@ -485,6 +488,44 @@ code, pre {
     font-size: 0.85rem;
 }
 
+.report-table .col-metric {
+    width: 35%;
+}
+
+.report-table .col-value {
+    width: 35%;
+}
+
+.report-table .col-status {
+    width: 30%;
+}
+
+.report-table .col-column {
+    width: 35%;
+}
+
+.report-table .col-count {
+    width: 25%;
+}
+
+.report-table .col-pct {
+    width: 25%;
+}
+
+.report-table .col-action {
+    width: 15%;
+}
+
+.report-table .col-stat {
+    width: 15%;
+    min-width: 80px;
+}
+
+.report-table .col-numeric {
+    width: auto;
+    min-width: 80px;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .main .block-container {
@@ -507,7 +548,7 @@ code, pre {
     .report-table th,
     .report-table td {
         padding: 0.4rem 0.3rem !important;
-        font-size: 0.75rem !important;
+        font-size: 0.7rem !important;
     }
 }
 </style>
@@ -608,13 +649,18 @@ with st.sidebar:
 # ── Page Router ───────────────────────────────────────────────────────────────
 page = st.session_state.current_page
 
-# ── Report Table Helper Function ─────────────────────────────────────────────
+# ── Report Table Helper Function - FIXED ─────────────────────────────────────
 def render_report_table(df: pd.DataFrame = None):
     """Render a styled report table with metrics."""
     
     # Get data if not provided
     if df is None and is_data_loaded():
         df = get_df()
+    
+    # If no data, show message and return
+    if df is None:
+        st.info("📊 No data loaded. Upload a CSV to see the report summary.")
+        return
     
     # Safely get quality_report - handle None or non-dict
     quality_report = st.session_state.get("quality_report")
@@ -625,20 +671,16 @@ def render_report_table(df: pd.DataFrame = None):
     if cleaning_report is None or not isinstance(cleaning_report, dict):
         cleaning_report = {}
     
-    # Only render if we have data
-    if df is None:
-        st.info("📊 No data loaded. Upload a CSV to see the report summary.")
-        return
-    
+    # ── Data Quality & Cleaning Summary ──
     st.markdown("""
     <div class="report-table-container">
         <h3 style="color: #77B4C7; margin-bottom: 1rem;">📊 Data Quality & Cleaning Summary</h3>
         <table class="report-table">
             <thead>
                 <tr>
-                    <th style="width: 40%;">Metric</th>
-                    <th style="width: 35%;">Value</th>
-                    <th style="width: 25%;">Status</th>
+                    <th class="col-metric">Metric</th>
+                    <th class="col-value">Value</th>
+                    <th class="col-status">Status</th>
                 </tr>
             </thead>
             <tbody>
@@ -696,7 +738,7 @@ def render_report_table(df: pd.DataFrame = None):
     </div>
     """, unsafe_allow_html=True)
     
-    # Missingness Analysis
+    # ── Missingness Analysis ──
     missing_data = df.isnull().sum()
     missing_cols = missing_data[missing_data > 0]
     
@@ -707,10 +749,10 @@ def render_report_table(df: pd.DataFrame = None):
             <table class="report-table">
                 <thead>
                     <tr>
-                        <th style="width: 35%;">Column</th>
-                        <th style="width: 25%;">Missing Count</th>
-                        <th style="width: 25%;">Missing %</th>
-                        <th style="width: 15%;">Action</th>
+                        <th class="col-column">Column</th>
+                        <th class="col-count">Missing Count</th>
+                        <th class="col-pct">Missing %</th>
+                        <th class="col-action">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -743,41 +785,59 @@ def render_report_table(df: pd.DataFrame = None):
         </div>
         """, unsafe_allow_html=True)
     
-    # Numeric Summary
+    # ── Numeric Summary ──
     numeric_cols = df.select_dtypes(include="number").columns
     if len(numeric_cols) > 0:
+        # Limit to first 6 numeric columns for display
+        display_cols = numeric_cols[:6]
+        
         st.markdown("""
         <div class="report-table-container">
-            <h3 style="color: #77B4C7; margin-bottom: 1rem;">📈 Numeric Summary (Selected Fields)</h3>
+            <h3 style="color: #77B4C7; margin-bottom: 1rem;">📈 Numeric Summary</h3>
             <table class="report-table">
                 <thead>
                     <tr>
-                        <th style="min-width: 80px;">Statistic</th>
+                        <th class="col-stat">Statistic</th>
         """, unsafe_allow_html=True)
         
-        # Headers
-        for col in numeric_cols[:6]:
-            st.markdown(f"<th style='min-width: 80px;'>{col}</th>", unsafe_allow_html=True)
+        # Headers - fixed to show actual column names
+        for col in display_cols:
+            st.markdown(f"<th class='col-numeric'>{col}</th>", unsafe_allow_html=True)
         
         st.markdown("</tr></thead><tbody>", unsafe_allow_html=True)
         
-        # Statistics
-        stats = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
-        stat_labels = ['Count', 'Mean', 'Std. Dev.', 'Min', '25th %', 'Median', '75th %', 'Max']
-        
-        for stat, label in zip(stats, stat_labels):
-            st.markdown(f"<tr><td><strong>{label}</strong></td>", unsafe_allow_html=True)
-            for col in numeric_cols[:6]:
-                try:
-                    val = df[col].describe()[stat]
-                    if stat == 'count':
-                        val = f"{int(val):,}"
-                    else:
-                        val = f"{val:,.2f}"
-                except:
-                    val = "—"
-                st.markdown(f"<td>{val}</td>", unsafe_allow_html=True)
-            st.markdown("</tr>", unsafe_allow_html=True)
+        # Statistics - using describe() correctly
+        try:
+            desc_df = df[display_cols].describe()
+            
+            # Define stats to display
+            stats_to_display = [
+                ('count', 'Count'),
+                ('mean', 'Mean'),
+                ('std', 'Std. Dev.'),
+                ('min', 'Min'),
+                ('25%', '25th %'),
+                ('50%', 'Median'),
+                ('75%', '75th %'),
+                ('max', 'Max')
+            ]
+            
+            for stat, label in stats_to_display:
+                st.markdown(f"<tr><td><strong>{label}</strong></td>", unsafe_allow_html=True)
+                for col in display_cols:
+                    try:
+                        val = desc_df.loc[stat, col]
+                        if stat == 'count':
+                            val_str = f"{int(val):,}"
+                        else:
+                            val_str = f"{val:,.2f}"
+                    except:
+                        val_str = "—"
+                    st.markdown(f"<td>{val_str}</td>", unsafe_allow_html=True)
+                st.markdown("</tr>", unsafe_allow_html=True)
+                
+        except Exception as e:
+            st.markdown(f"<tr><td colspan='{len(display_cols)+1}'>Error displaying statistics: {str(e)}</td></tr>", unsafe_allow_html=True)
         
         st.markdown("""
                 </tbody>
@@ -785,8 +845,8 @@ def render_report_table(df: pd.DataFrame = None):
         </div>
         """, unsafe_allow_html=True)
         
-        # Key Insights
-        st.markdown("""
+        # ── Key Insights ──
+        st.markdown(f"""
         <div style="background: linear-gradient(135deg, rgba(19,113,160,0.08), rgba(49,136,173,0.04)); 
                     border-left: 4px solid #1371A0; 
                     border-radius: 8px; 
@@ -794,12 +854,11 @@ def render_report_table(df: pd.DataFrame = None):
                     margin: 1rem 0;">
             <h4 style="color: #77B4C7; margin-bottom: 0.5rem;">💡 Key Insights</h4>
             <p style="color: #c0c0e0; margin: 0;">
-                <strong>Data Overview</strong>: The dataset contains <strong>{df.shape[0]:,}</strong> rows and 
-                <strong>{df.shape[1]}</strong> columns with {len(numeric_cols)} numeric features.
+                <strong>Dataset Overview</strong>: {df.shape[0]:,} rows × {df.shape[1]} columns with 
+                {len(numeric_cols)} numeric features and {len(df.select_dtypes(include='object').columns)} categorical features.
             </p>
             <p style="color: #c0c0e0; margin-top: 0.5rem;">
-                <strong>Quality Assessment</strong>: Data quality score is <strong>{score:.1f}/100</strong> 
-                with <strong>{completeness:.1f}%</strong> completeness.
+                <strong>Data Quality</strong>: {completeness:.1f}% completeness with a quality score of {score:.1f}/100.
             </p>
         </div>
         """, unsafe_allow_html=True)
