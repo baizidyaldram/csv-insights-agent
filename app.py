@@ -316,7 +316,7 @@ p, .stMarkdown {
 
 /* ============ BADGES ============ */
 .badge-ready {
-    background: linear-gradient(135deg, #10b981, #34d399);
+    background: linear-gradient(135deg, #1371A0, #2E7C9E);
     padding: 4px 12px;
     border-radius: 20px;
     font-size: 0.7rem;
@@ -325,14 +325,31 @@ p, .stMarkdown {
     color: white !important;
 }
 
-.badge-waiting {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    display: inline-block;
-    color: white !important;
+/* Update metric cards */
+.metric-card {
+    background: linear-gradient(135deg, rgba(19, 113, 160, 0.1), rgba(46, 124, 158, 0.05));
+    border: 1px solid rgba(19, 113, 160, 0.2);
+}
+
+.metric-card:hover {
+    border-color: rgba(19, 113, 160, 0.5);
+    background: linear-gradient(135deg, rgba(19, 113, 160, 0.15), rgba(46, 124, 158, 0.08));
+}
+
+/* Update progress bars */
+.stProgress > div > div {
+    background: linear-gradient(90deg, #1371A0, #3188AD);
+}
+
+/* Update agent cards hover */
+.agent-card:hover {
+    border-color: rgba(19, 113, 160, 0.4);
+    background: linear-gradient(135deg, rgba(19, 113, 160, 0.08), rgba(46, 124, 158, 0.04));
+}
+
+/* Sidebar accent */
+[data-testid="stSidebar"] {
+    border-right: 1px solid rgba(19, 113, 160, 0.2);
 }
 
 /* ============ DIVIDER ============ */
