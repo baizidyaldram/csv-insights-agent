@@ -475,19 +475,6 @@ code, pre {
     font-weight: 600;
 }
 
-.report-table .text-right {
-    text-align: right;
-}
-
-.report-table .text-center {
-    text-align: center;
-}
-
-.report-table .text-muted {
-    color: #94a3b8;
-    font-size: 0.85rem;
-}
-
 /* Column width classes */
 .report-table .col-metric { width: 35%; }
 .report-table .col-value { width: 35%; }
@@ -641,9 +628,9 @@ with st.sidebar:
 # ── Page Router ───────────────────────────────────────────────────────────────
 page = st.session_state.current_page
 
-# ── Report Table Helper Function - FIXED HTML RENDERING ─────────────────────
+# ── Report Table Helper Function ─────────────────────────────────────────────
 def render_report_table(df: pd.DataFrame = None):
-    """Render a styled report table with metrics - FIXED for proper HTML rendering."""
+    """Render a styled report table with metrics - only shown on report page."""
     
     # Get data if not provided
     if df is None and is_data_loaded():
@@ -670,9 +657,7 @@ def render_report_table(df: pd.DataFrame = None):
     rows_after = cleaning_report.get('after_shape', [rows_before])[0] if cleaning_report else rows_before
     rows_removed = rows_before - rows_after
     
-    # ── Use st.markdown with proper HTML ──
-    
-    # Quality Summary Table
+    # ── Data Quality & Cleaning Summary ──
     st.markdown(f"""
     <div class="report-table-container">
         <h3 style="color: #77B4C7; margin-bottom: 1rem;">📊 Data Quality & Cleaning Summary</h3>
@@ -851,18 +836,15 @@ try:
     if page == "home":
         from pages_content.home import render
         render()
-        # Show report table on home page if data is loaded
-        if is_data_loaded():
-            st.markdown("---")
-            st.markdown("### 📊 Quick Report Summary")
-            render_report_table()
-            
+        # No report table on home page - keep it clean!
+        
     elif page == "quality":
         from pages_content.quality import render
         render()
         # Show report table after quality analysis
         if st.session_state.get("quality_report"):
             st.markdown("---")
+            st.markdown("### 📊 Report Summary")
             render_report_table()
             
     elif page == "cleaning":
@@ -871,6 +853,7 @@ try:
         # Show report table after cleaning
         if st.session_state.get("cleaning_report"):
             st.markdown("---")
+            st.markdown("### 📊 Report Summary")
             render_report_table()
             
     elif page == "stats":
@@ -879,6 +862,7 @@ try:
         # Show report table after stats
         if st.session_state.get("stats_done"):
             st.markdown("---")
+            st.markdown("### 📊 Report Summary")
             render_report_table()
             
     elif page == "visualization":
@@ -892,9 +876,10 @@ try:
     elif page == "ai_report":
         from pages_content.ai_report import render
         render()
-        # Show report table in AI report page
+        # Show report table on the AI Report page (this is where it belongs)
         if is_data_loaded():
             st.markdown("---")
+            st.markdown("### 📊 Detailed Report Summary")
             render_report_table()
             
 except ImportError as e:
