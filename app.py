@@ -422,12 +422,14 @@ code, pre {
     padding: 1.5rem;
     border: 1px solid rgba(19, 113, 160, 0.15);
     margin: 1rem 0;
+    overflow-x: auto;
 }
 
 .report-table {
     width: 100%;
     border-collapse: collapse;
     color: #e2e2f0;
+    font-size: 0.9rem;
 }
 
 .report-table thead tr {
@@ -436,20 +438,22 @@ code, pre {
 
 .report-table th {
     text-align: left;
-    padding: 0.75rem;
+    padding: 0.75rem 0.5rem;
     color: #77B4C7;
     font-weight: 600;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
+    white-space: nowrap;
 }
 
 .report-table td {
-    padding: 0.75rem;
-    border-bottom: 1px solid rgba(19, 113, 160, 0.1);
+    padding: 0.65rem 0.5rem;
+    border-bottom: 1px solid rgba(19, 113, 160, 0.08);
+    vertical-align: middle;
 }
 
-.report-table tr:hover {
+.report-table tbody tr:hover {
     background: rgba(19, 113, 160, 0.05);
 }
 
@@ -466,6 +470,19 @@ code, pre {
 .report-table .status-danger {
     color: #ef4444;
     font-weight: 600;
+}
+
+.report-table .text-right {
+    text-align: right;
+}
+
+.report-table .text-center {
+    text-align: center;
+}
+
+.report-table .text-muted {
+    color: #94a3b8;
+    font-size: 0.85rem;
 }
 
 /* Responsive Design */
@@ -489,8 +506,8 @@ code, pre {
     
     .report-table th,
     .report-table td {
-        padding: 0.5rem !important;
-        font-size: 0.8rem !important;
+        padding: 0.4rem 0.3rem !important;
+        font-size: 0.75rem !important;
     }
 }
 </style>
@@ -599,9 +616,19 @@ def render_report_table(df: pd.DataFrame = None):
     if df is None and is_data_loaded():
         df = get_df()
     
-    # Quality metrics
-    quality_report = st.session_state.get("quality_report", {})
-    cleaning_report = st.session_state.get("cleaning_report", {})
+    # Safely get quality_report - handle None or non-dict
+    quality_report = st.session_state.get("quality_report")
+    if quality_report is None or not isinstance(quality_report, dict):
+        quality_report = {}
+    
+    cleaning_report = st.session_state.get("cleaning_report")
+    if cleaning_report is None or not isinstance(cleaning_report, dict):
+        cleaning_report = {}
+    
+    # Only render if we have data
+    if df is None:
+        st.info("📊 No data loaded. Upload a CSV to see the report summary.")
+        return
     
     st.markdown("""
     <div class="report-table-container">
@@ -609,59 +636,59 @@ def render_report_table(df: pd.DataFrame = None):
         <table class="report-table">
             <thead>
                 <tr>
-                    <th>Metric</th>
-                    <th>Value</th>
-                    <th>Status</th>
+                    <th style="width: 40%;">Metric</th>
+                    <th style="width: 35%;">Value</th>
+                    <th style="width: 25%;">Status</th>
                 </tr>
             </thead>
             <tbody>
     """, unsafe_allow_html=True)
     
     # Basic metrics
-    if df is not None:
-        rows_before = len(df)
-        rows_after = cleaning_report.get('after_shape', [rows_before])[0] if cleaning_report else rows_before
-        rows_removed = rows_before - rows_after
-        
-        st.markdown(f"""
-        <tr>
-            <td><strong>Total Rows (Original)</strong></td>
-            <td>{rows_before:,}</td>
-            <td class="status-success">✅</td>
-        </tr>
-        <tr>
-            <td><strong>Rows After Cleaning</strong></td>
-            <td>{rows_after:,}</td>
-            <td class="status-success">✅</td>
-        </tr>
-        <tr>
-            <td><strong>Rows Removed</strong></td>
-            <td>{rows_removed:,}</td>
-            <td class="{'status-success' if rows_removed == 0 else 'status-warning'}">{'✅' if rows_removed == 0 else '⚠️'}</td>
-        </tr>
-        """, unsafe_allow_html=True)
-    
-    # Quality metrics
-    completeness = quality_report.get('completeness', 0)
-    score = quality_report.get('score', 0)
-    
-    status_class = "status-success" if completeness >= 95 else "status-warning" if completeness >= 80 else "status-danger"
-    status_icon = "✅" if completeness >= 95 else "⚠️" if completeness >= 80 else "❌"
+    rows_before = len(df)
+    rows_after = cleaning_report.get('after_shape', [rows_before])[0] if cleaning_report else rows_before
+    rows_removed = rows_before - rows_after
     
     st.markdown(f"""
     <tr>
-        <td><strong>Completeness</strong></td>
-        <td>{completeness:.1f}%</td>
-        <td class="{status_class}">{status_icon}</td>
+        <td><strong>Total Rows (Original)</strong></td>
+        <td>{rows_before:,}</td>
+        <td class="status-success">✅</td>
     </tr>
     <tr>
-        <td><strong>Data Quality Score</strong></td>
-        <td>{score:.1f}/100</td>
-        <td class="{'status-success' if score >= 85 else 'status-warning' if score >= 70 else 'status-danger'}">
-            {'⭐' if score >= 85 else '📊' if score >= 70 else '⚠️'}
-        </td>
+        <td><strong>Rows After Cleaning</strong></td>
+        <td>{rows_after:,}</td>
+        <td class="status-success">✅</td>
+    </tr>
+    <tr>
+        <td><strong>Rows Removed</strong></td>
+        <td>{rows_removed:,}</td>
+        <td class="{'status-success' if rows_removed == 0 else 'status-warning'}">{'✅' if rows_removed == 0 else '⚠️'}</td>
     </tr>
     """, unsafe_allow_html=True)
+    
+    # Quality metrics - safely get values
+    completeness = quality_report.get('completeness', 0)
+    score = quality_report.get('score', 0)
+    
+    if completeness > 0 or score > 0:
+        status_class = "status-success" if completeness >= 95 else "status-warning" if completeness >= 80 else "status-danger"
+        status_icon = "✅" if completeness >= 95 else "⚠️" if completeness >= 80 else "❌"
+        
+        st.markdown(f"""
+        <tr>
+            <td><strong>Completeness</strong></td>
+            <td>{completeness:.1f}%</td>
+            <td class="{status_class}">{status_icon}</td>
+        </tr>
+        <tr>
+            <td><strong>Data Quality Score</strong></td>
+            <td>{score:.1f}/100</td>
+            <td class="{'status-success' if score >= 85 else 'status-warning' if score >= 70 else 'status-danger'}">
+                {'⭐' if score >= 85 else '📊' if score >= 70 else '⚠️'}
+            </td>
+        </tr>
+        """, unsafe_allow_html=True)
     
     st.markdown("""
             </tbody>
@@ -670,104 +697,112 @@ def render_report_table(df: pd.DataFrame = None):
     """, unsafe_allow_html=True)
     
     # Missingness Analysis
-    if df is not None:
-        missing_data = df.isnull().sum()
-        missing_cols = missing_data[missing_data > 0]
+    missing_data = df.isnull().sum()
+    missing_cols = missing_data[missing_data > 0]
+    
+    if len(missing_cols) > 0:
+        st.markdown("""
+        <div class="report-table-container">
+            <h3 style="color: #77B4C7; margin-bottom: 1rem;">🔍 Missingness Analysis</h3>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th style="width: 35%;">Column</th>
+                        <th style="width: 25%;">Missing Count</th>
+                        <th style="width: 25%;">Missing %</th>
+                        <th style="width: 15%;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+        """, unsafe_allow_html=True)
         
-        if len(missing_cols) > 0:
-            st.markdown("""
-            <div class="report-table-container">
-                <h3 style="color: #77B4C7; margin-bottom: 1rem;">🔍 Missingness Analysis</h3>
-                <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Column</th>
-                            <th>Missing Count</th>
-                            <th>Missing %</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            """, unsafe_allow_html=True)
+        for col, count in missing_cols.head(10).items():
+            pct = (count / len(df)) * 100
+            if pct < 5:
+                action = "Imputed"
+                status_class = "status-success"
+            elif pct < 30:
+                action = "Retained"
+                status_class = "status-warning"
+            else:
+                action = "Investigate"
+                status_class = "status-danger"
             
-            for col, count in missing_cols.head(10).items():
-                pct = (count / len(df)) * 100
-                action = "Imputed" if pct < 5 else "Retained" if pct < 30 else "Investigate"
-                status_class = "status-success" if pct < 5 else "status-warning" if pct < 30 else "status-danger"
-                
-                st.markdown(f"""
-                <tr>
-                    <td><code>{col}</code></td>
-                    <td>{count:,}</td>
-                    <td>{pct:.1f}%</td>
-                    <td class="{status_class}">{action}</td>
-                </tr>
-                """, unsafe_allow_html=True)
-            
-            st.markdown("""
-                    </tbody>
-                </table>
-            </div>
+            st.markdown(f"""
+            <tr>
+                <td><code>{col}</code></td>
+                <td>{count:,}</td>
+                <td>{pct:.1f}%</td>
+                <td class="{status_class}">{action}</td>
+            </tr>
             """, unsafe_allow_html=True)
+        
+        st.markdown("""
+                </tbody>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
     
     # Numeric Summary
-    if df is not None:
-        numeric_cols = df.select_dtypes(include="number").columns
-        if len(numeric_cols) > 0:
-            st.markdown("""
-            <div class="report-table-container">
-                <h3 style="color: #77B4C7; margin-bottom: 1rem;">📈 Numeric Summary (Selected Fields)</h3>
-                <table class="report-table">
-                    <thead>
-                        <tr>
-                            <th>Statistic</th>
-            """, unsafe_allow_html=True)
-            
-            # Headers
+    numeric_cols = df.select_dtypes(include="number").columns
+    if len(numeric_cols) > 0:
+        st.markdown("""
+        <div class="report-table-container">
+            <h3 style="color: #77B4C7; margin-bottom: 1rem;">📈 Numeric Summary (Selected Fields)</h3>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th style="min-width: 80px;">Statistic</th>
+        """, unsafe_allow_html=True)
+        
+        # Headers
+        for col in numeric_cols[:6]:
+            st.markdown(f"<th style='min-width: 80px;'>{col}</th>", unsafe_allow_html=True)
+        
+        st.markdown("</tr></thead><tbody>", unsafe_allow_html=True)
+        
+        # Statistics
+        stats = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
+        stat_labels = ['Count', 'Mean', 'Std. Dev.', 'Min', '25th %', 'Median', '75th %', 'Max']
+        
+        for stat, label in zip(stats, stat_labels):
+            st.markdown(f"<tr><td><strong>{label}</strong></td>", unsafe_allow_html=True)
             for col in numeric_cols[:6]:
-                st.markdown(f"<th>{col}</th>", unsafe_allow_html=True)
-            
-            st.markdown("</tr></thead><tbody>", unsafe_allow_html=True)
-            
-            # Statistics
-            stats = ['count', 'mean', 'std', 'min', '25%', '50%', '75%', 'max']
-            stat_labels = ['Count', 'Mean', 'Std. Dev.', 'Min', '25th %', 'Median', '75th %', 'Max']
-            
-            for stat, label in zip(stats, stat_labels):
-                st.markdown(f"<tr><td><strong>{label}</strong></td>", unsafe_allow_html=True)
-                for col in numeric_cols[:6]:
+                try:
                     val = df[col].describe()[stat]
                     if stat == 'count':
                         val = f"{int(val):,}"
                     else:
                         val = f"{val:,.2f}"
-                    st.markdown(f"<td>{val}</td>", unsafe_allow_html=True)
-                st.markdown("</tr>", unsafe_allow_html=True)
-            
-            st.markdown("""
-                    </tbody>
-                </table>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            # Key Insights
-            st.markdown("""
-            <div style="background: linear-gradient(135deg, rgba(19,113,160,0.08), rgba(49,136,173,0.04)); 
-                        border-left: 4px solid #1371A0; 
-                        border-radius: 8px; 
-                        padding: 1rem; 
-                        margin: 1rem 0;">
-                <h4 style="color: #77B4C7; margin-bottom: 0.5rem;">💡 Key Insights</h4>
-                <p style="color: #c0c0e0; margin: 0;">
-                    <strong>Skewness</strong>: Both <code>budget</code> and <code>revenue</code> are right-skewed; 
-                    the inter-quartile range (IQR) is far lower than the max, confirming a long tail of high-value entries.
-                </p>
-                <p style="color: #c0c0e0; margin-top: 0.5rem;">
-                    <strong>Missingness</strong>: Minimal missing values detected; optional fields were retained 
-                    as they provide useful sparsity patterns for analysis.
-                </p>
-            </div>
-            """, unsafe_allow_html=True)
+                except:
+                    val = "—"
+                st.markdown(f"<td>{val}</td>", unsafe_allow_html=True)
+            st.markdown("</tr>", unsafe_allow_html=True)
+        
+        st.markdown("""
+                </tbody>
+            </table>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Key Insights
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, rgba(19,113,160,0.08), rgba(49,136,173,0.04)); 
+                    border-left: 4px solid #1371A0; 
+                    border-radius: 8px; 
+                    padding: 1rem; 
+                    margin: 1rem 0;">
+            <h4 style="color: #77B4C7; margin-bottom: 0.5rem;">💡 Key Insights</h4>
+            <p style="color: #c0c0e0; margin: 0;">
+                <strong>Data Overview</strong>: The dataset contains <strong>{df.shape[0]:,}</strong> rows and 
+                <strong>{df.shape[1]}</strong> columns with {len(numeric_cols)} numeric features.
+            </p>
+            <p style="color: #c0c0e0; margin-top: 0.5rem;">
+                <strong>Quality Assessment</strong>: Data quality score is <strong>{score:.1f}/100</strong> 
+                with <strong>{completeness:.1f}%</strong> completeness.
+            </p>
+        </div>
+        """, unsafe_allow_html=True)
 
 # ── Page Router with Report Integration ──────────────────────────────────────
 try:
