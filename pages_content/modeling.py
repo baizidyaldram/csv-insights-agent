@@ -240,8 +240,7 @@ def get_base_model(model_name, task_type, random_state):
                 return DecisionTreeClassifier(max_depth=10, random_state=random_state)
             elif model_name == "XGBoost" and XGB_AVAILABLE:
                 return xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=6,
-                                         random_state=random_state, eval_metric='logloss',
-                                         use_label_encoder=False)
+                                         random_state=random_state, eval_metric='logloss')
             elif model_name == "LightGBM" and LGB_AVAILABLE:
                 return lgb.LGBMClassifier(n_estimators=100, learning_rate=0.1,
                                           random_state=random_state, verbose=-1)
@@ -320,7 +319,16 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
         y_inverse_mapping = {i: label for i, label in enumerate(le_y.classes_)}
         log_step(f"Encoded target → {len(le_y.classes_)} classes")
 
-    stratify = y if task_type == "classification" else None
+    # Only stratify for classification AND when every class has ≥2 members
+    stratify = None
+    if task_type == "classification":
+        from collections import Counter
+        class_counts = Counter(y)
+        if min(class_counts.values()) >= 2:
+            stratify = y
+        else:
+            log_step("⚠️ Some classes have <2 samples — stratification disabled.")
+
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state, stratify=stratify
     )
