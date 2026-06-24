@@ -134,7 +134,7 @@ def render():
 
     st.markdown("---")
     st.markdown("""
-    <div style="text-align:center; padding:0.75rem 0 0; color:#9E9385; font-size:0.73rem;">
+    <div style="text-align:center; padding:0.75rem 0 0; color:#3D3530; font-size:0.73rem; opacity:0.6;">
         Powered by Streamlit · Plotly · XGBoost · OpenRouter AI
     </div>
     """, unsafe_allow_html=True)
