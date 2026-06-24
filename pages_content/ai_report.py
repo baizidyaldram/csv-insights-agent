@@ -15,14 +15,16 @@ def render():
     /* Report container dark mode fixes */
     @media (prefers-color-scheme: dark) {
         .report-container h2 { 
-            color: #F0E6D8 !important; 
+            color: #F5E6D0 !important; 
             border-left-color: #F0997B !important; 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
         }
         .report-container h3 { 
-            color: #E0D4C8 !important; 
+            color: #E8D5C0 !important; 
+            text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
         }
         .report-container strong { 
-            color: #F0997B !important; 
+            color: #F5A07A !important; 
         }
         .report-container li { 
             color: #D5CCBF !important; 
@@ -40,6 +42,13 @@ def render():
         .report-wrapper {
             background: #2A2420 !important;
             border-color: #4A3F37 !important;
+        }
+        /* Make bullet points more visible */
+        .report-container ul {
+            list-style-type: disc !important;
+        }
+        .report-container li::marker {
+            color: #F0997B !important;
         }
     }
     </style>
@@ -180,36 +189,36 @@ def format_report_html(text: str) -> str:
     if not text:
         return "<p>No report content.</p>"
 
-    # Process headings with strong, visible styles
+    # Process headings with strong, visible styles - using !important for dark mode override
     text = re.sub(
         r'^## (.*?)$', 
-        r'<h2 style="color:#2D1B00;font-size:1.45rem;font-weight:800;margin-top:1.8rem;margin-bottom:0.6rem;border-left:5px solid #EF9F27;padding-left:0.9rem;letter-spacing:-0.01em;">\1</h2>', 
+        r'<h2 style="color:#2D1B00;font-size:1.5rem;font-weight:800;margin-top:1.8rem;margin-bottom:0.6rem;border-left:6px solid #EF9F27;padding-left:0.9rem;letter-spacing:-0.01em;text-shadow:0 1px 2px rgba(255,255,255,0.1);">\1</h2>', 
         text, flags=re.MULTILINE
     )
     text = re.sub(
         r'^### (.*?)$', 
-        r'<h3 style="color:#4A2A00;font-size:1.2rem;font-weight:700;margin-top:1.2rem;margin-bottom:0.4rem;letter-spacing:-0.01em;">\1</h3>', 
+        r'<h3 style="color:#4A2A00;font-size:1.25rem;font-weight:700;margin-top:1.2rem;margin-bottom:0.4rem;letter-spacing:-0.01em;text-shadow:0 1px 2px rgba(255,255,255,0.05);">\1</h3>', 
         text, flags=re.MULTILINE
     )
     # Bold text with strong color
     text = re.sub(
         r'\*\*(.*?)\*\*', 
-        r'<strong style="color:#B83A00;font-weight:700;">\1</strong>', 
+        r'<strong style="color:#B83A00;font-weight:700;background:rgba(239,159,39,0.08);padding:0 4px;border-radius:3px;">\1</strong>', 
         text
     )
     text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
-    # Bullet points
+    # Bullet points with better visibility
     text = re.sub(
         r'^[-•]\s+(.*?)$', 
-        r'<li style="margin-bottom:0.5rem;color:#221E1B;">\1</li>', 
+        r'<li style="margin-bottom:0.5rem;color:#221E1B;font-weight:400;line-height:1.6;">\1</li>', 
         text, flags=re.MULTILINE
     )
     text = re.sub(
         r'^[0-9]+\.\s+(.*?)$', 
-        r'<li style="margin-bottom:0.5rem;color:#221E1B;">\1</li>', 
+        r'<li style="margin-bottom:0.5rem;color:#221E1B;font-weight:400;line-height:1.6;">\1</li>', 
         text, flags=re.MULTILINE
     )
-    # Wrap lists
+    # Wrap lists with better styling
     text = re.sub(
         r'(<li.*?</li>\n?)+', 
         r'<ul style="margin:0.7rem 0;padding-left:1.5rem;list-style-type:disc;">\g<0></ul>', 
