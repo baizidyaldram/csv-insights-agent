@@ -93,6 +93,103 @@ PARAM_GRIDS_REG = {
 
 
 def render():
+    # ── CUSTOM CSS FOR DARK MODE CONTRAST ──────────────────────────────────
+    st.markdown("""
+    <style>
+    /* Fix contrast for modeling page in dark mode */
+    @media (prefers-color-scheme: dark) {
+        /* Multiselect fix */
+        [data-baseweb="select"] [data-testid="stMultiSelect"] {
+            background: #2A2420 !important;
+            border-color: #4A3F37 !important;
+        }
+        [data-baseweb="select"] [data-testid="stMultiSelect"] input {
+            color: #EDE8DF !important;
+        }
+        [data-baseweb="select"] [data-testid="stMultiSelect"] .st-ae {
+            background: #3A3028 !important;
+            color: #EDE8DF !important;
+        }
+        [data-baseweb="select"] ul {
+            background: #2A2420 !important;
+            border-color: #4A3F37 !important;
+        }
+        [data-baseweb="select"] li {
+            color: #EDE8DF !important;
+        }
+        [data-baseweb="select"] li:hover {
+            background: #3A3028 !important;
+        }
+        [data-baseweb="tag"] {
+            background: #4A3F37 !important;
+            color: #EDE8DF !important;
+        }
+        [data-baseweb="tag"] span {
+            color: #EDE8DF !important;
+        }
+        /* Radio buttons */
+        .stRadio label {
+            color: #EDE8DF !important;
+        }
+        .stRadio .st-ae {
+            color: #EDE8DF !important;
+        }
+        /* Checkboxes */
+        .stCheckbox label {
+            color: #EDE8DF !important;
+        }
+        /* Selectbox */
+        [data-baseweb="select"] .st-bm {
+            color: #EDE8DF !important;
+        }
+        /* Number input */
+        .stNumberInput input {
+            color: #EDE8DF !important;
+            background: #2A2420 !important;
+            border-color: #4A3F37 !important;
+        }
+        /* Slider labels */
+        .stSlider label {
+            color: #EDE8DF !important;
+        }
+        /* Info boxes */
+        .stAlert {
+            background: #2A2420 !important;
+            color: #EDE8DF !important;
+        }
+        .stAlert p {
+            color: #EDE8DF !important;
+        }
+        /* Dataframe */
+        .stDataFrame {
+            background: #1A1714 !important;
+        }
+        .stDataFrame table {
+            color: #EDE8DF !important;
+        }
+        .stDataFrame th {
+            background: #2A2420 !important;
+            color: #EDE8DF !important;
+        }
+        .stDataFrame td {
+            color: #D5CCBF !important;
+        }
+        /* Tabs */
+        .stTabs [data-baseweb="tab-list"] {
+            background: #2A2420 !important;
+            border-color: #3A3028 !important;
+        }
+        .stTabs [data-baseweb="tab"] {
+            color: #9E9385 !important;
+        }
+        .stTabs [aria-selected="true"] {
+            background: #EF9F27 !important;
+            color: #1A1714 !important;
+        }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
     st.markdown("## 🤖 Modeling & Evaluation Agent")
     st.markdown("Train machine learning models — with optional hyperparameter tuning via GridSearchCV.")
 
