@@ -13,6 +13,9 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ──────────────────────────────────────────────────────────────────────────────
+# COMPREHENSIVE CSS WITH DARK MODE SUPPORT
+# ──────────────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
@@ -97,6 +100,12 @@ st.markdown("""
     color: var(--slate-800);
 }
 
+@media (prefers-color-scheme: dark) {
+    [data-testid="stSidebar"] .stButton button {
+        color: #EDE8DF !important;
+    }
+}
+
 [data-testid="stSidebar"] .stButton button:hover {
     background: var(--amber-50);
     border-color: var(--amber-100);
@@ -143,6 +152,7 @@ st.markdown("""
 @media (prefers-color-scheme: dark) {
     .agent-card { background: #2A2420; border-color: #3A3028; }
     .agent-card h4 { color: #EDE8DF; }
+    .agent-card p { color: #9E9385; }
     .agent-card:hover { background: #352B22; border-color: var(--amber-600); }
 }
 
@@ -176,6 +186,19 @@ st.markdown("""
     font-weight: 500;
 }
 
+@media (prefers-color-scheme: dark) {
+    .metric-card {
+        background: #2A2420;
+        border-color: #3A3028;
+    }
+    .metric-value {
+        color: #F0997B;
+    }
+    .metric-label {
+        color: #9E9385;
+    }
+}
+
 /* ── BUTTONS ────────────────────────────────────────────── */
 .stButton > button {
     background: var(--amber-200);
@@ -204,6 +227,25 @@ st.markdown("""
 .stButton > button[data-testid="baseButton-secondary"]:hover {
     background: var(--amber-50) !important;
     border-color: var(--amber-100) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .stButton > button[data-testid="baseButton-secondary"] {
+        color: #EDE8DF !important;
+        border-color: #4A3F37 !important;
+    }
+    .stButton > button[data-testid="baseButton-secondary"]:hover {
+        background: #2A2420 !important;
+        border-color: #EF9F27 !important;
+    }
+    .stDownloadButton button {
+        background: #EF9F27 !important;
+        color: #1A1714 !important;
+    }
+    .stDownloadButton button:hover {
+        background: #D85A30 !important;
+        color: #FFFFFF !important;
+    }
 }
 
 /* ── TYPOGRAPHY ─────────────────────────────────────────── */
@@ -256,15 +298,57 @@ h3 {
     color: white !important;
 }
 
+@media (prefers-color-scheme: dark) {
+    .stTabs [data-baseweb="tab-list"] {
+        background: #2A2420 !important;
+        border-color: #3A3028 !important;
+    }
+    .stTabs [data-baseweb="tab"] {
+        color: #9E9385 !important;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        color: #EDE8DF !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background: #EF9F27 !important;
+        color: #1A1714 !important;
+    }
+    .stTabs [aria-selected="true"]:hover {
+        color: #1A1714 !important;
+    }
+}
+
 /* ── PROGRESS ───────────────────────────────────────────── */
 .stProgress > div > div {
     background: var(--amber-200);
+}
+
+@media (prefers-color-scheme: dark) {
+    .stProgress > div > div {
+        background: #EF9F27 !important;
+    }
+    .stProgress > div {
+        background: #2A2420 !important;
+    }
 }
 
 /* ── ALERTS ─────────────────────────────────────────────── */
 .stAlert {
     border-radius: 12px !important;
     border-left: 4px solid var(--amber-200) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+    .stAlert {
+        background: #2A2420 !important;
+        border-color: #4A3F37 !important;
+    }
+    .stAlert p {
+        color: #EDE8DF !important;
+    }
+    .stAlert .st-ae {
+        color: #EDE8DF !important;
+    }
 }
 
 /* ── FILE UPLOADER ──────────────────────────────────────── */
@@ -280,6 +364,20 @@ h3 {
     background: var(--amber-50);
 }
 
+@media (prefers-color-scheme: dark) {
+    [data-testid="stFileUploader"] {
+        border-color: #4A3F37 !important;
+        background: #2A2420 !important;
+    }
+    [data-testid="stFileUploader"]:hover {
+        border-color: #EF9F27 !important;
+        background: #3A3028 !important;
+    }
+    [data-testid="stFileUploader"] p {
+        color: #EDE8DF !important;
+    }
+}
+
 /* ── DIVIDERS ────────────────────────────────────────────── */
 hr {
     margin: 1.5rem 0;
@@ -288,11 +386,23 @@ hr {
     background: linear-gradient(90deg, transparent, var(--slate-200), transparent);
 }
 
+@media (prefers-color-scheme: dark) {
+    hr {
+        background: linear-gradient(90deg, transparent, #3A3028, transparent);
+    }
+}
+
 /* ── SCROLLBAR ───────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--slate-50); border-radius: 10px; }
 ::-webkit-scrollbar-thumb { background: var(--amber-100); border-radius: 10px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--amber-200); }
+
+@media (prefers-color-scheme: dark) {
+    ::-webkit-scrollbar-track { background: #2A2420; }
+    ::-webkit-scrollbar-thumb { background: #4A3F37; }
+    ::-webkit-scrollbar-thumb:hover { background: #5A4F45; }
+}
 
 /* ── BADGES ──────────────────────────────────────────────── */
 .badge-ready {
@@ -315,12 +425,31 @@ hr {
     display: inline-block;
 }
 
+@media (prefers-color-scheme: dark) {
+    .badge-ready {
+        background: #2A4A1A;
+        color: #A0D080;
+    }
+    .badge-waiting {
+        background: #3A3028;
+        color: #FAC775;
+    }
+}
+
 /* ── CODE ────────────────────────────────────────────────── */
 code, pre {
     background: var(--slate-50);
     border-radius: 8px;
     border: 1px solid var(--slate-100);
     color: var(--coral-600);
+}
+
+@media (prefers-color-scheme: dark) {
+    code, pre {
+        background: #2A2420;
+        border-color: #3A3028;
+        color: #F0997B;
+    }
 }
 
 /* ── SELECT / INPUT ─────────────────────────────────────── */
@@ -339,6 +468,192 @@ code, pre {
     border-radius: 8px;
 }
 
+@media (prefers-color-scheme: dark) {
+    /* Fix all select boxes */
+    [data-baseweb="select"] {
+        background: #2A2420 !important;
+    }
+    [data-baseweb="select"] [data-testid="stSelectbox"] {
+        background: #2A2420 !important;
+        color: #EDE8DF !important;
+    }
+    [data-baseweb="select"] input {
+        color: #EDE8DF !important;
+    }
+    [data-baseweb="select"] .st-bm {
+        color: #EDE8DF !important;
+    }
+    
+    /* Fix all multi-select */
+    [data-baseweb="select"] [data-testid="stMultiSelect"] {
+        background: #2A2420 !important;
+    }
+    [data-baseweb="select"] [data-testid="stMultiSelect"] input {
+        color: #EDE8DF !important;
+    }
+    
+    /* Fix dropdown menus */
+    [data-baseweb="select"] ul {
+        background: #2A2420 !important;
+        border-color: #4A3F37 !important;
+    }
+    [data-baseweb="select"] li {
+        color: #EDE8DF !important;
+    }
+    [data-baseweb="select"] li:hover {
+        background: #3A3028 !important;
+    }
+    [data-baseweb="select"] li[aria-selected="true"] {
+        background: #4A3F37 !important;
+        color: #F0E6D8 !important;
+    }
+    
+    /* Fix tags in multi-select */
+    [data-baseweb="tag"] {
+        background: #4A3F37 !important;
+        color: #EDE8DF !important;
+        border-color: #5A4F45 !important;
+    }
+    [data-baseweb="tag"] span {
+        color: #EDE8DF !important;
+    }
+    [data-baseweb="tag"] button {
+        color: #EDE8DF !important;
+    }
+    [data-baseweb="tag"] button:hover {
+        color: #F0997B !important;
+        background: rgba(240, 153, 123, 0.2) !important;
+    }
+    
+    /* Fix all text inputs */
+    [data-testid="stTextInput"] input {
+        color: #EDE8DF !important;
+        background: #2A2420 !important;
+        border-color: #4A3F37 !important;
+    }
+    [data-testid="stTextInput"] input:focus {
+        border-color: #EF9F27 !important;
+        box-shadow: 0 0 0 2px rgba(239,159,39,0.2) !important;
+    }
+    
+    /* Fix all number inputs */
+    [data-testid="stNumberInput"] input {
+        color: #EDE8DF !important;
+        background: #2A2420 !important;
+        border-color: #4A3F37 !important;
+    }
+    [data-testid="stNumberInput"] input:focus {
+        border-color: #EF9F27 !important;
+        box-shadow: 0 0 0 2px rgba(239,159,39,0.2) !important;
+    }
+    
+    /* Fix text areas */
+    [data-testid="stTextArea"] textarea {
+        color: #EDE8DF !important;
+        background: #2A2420 !important;
+        border-color: #4A3F37 !important;
+    }
+    [data-testid="stTextArea"] textarea:focus {
+        border-color: #EF9F27 !important;
+        box-shadow: 0 0 0 2px rgba(239,159,39,0.2) !important;
+    }
+    
+    /* Fix radio buttons */
+    .stRadio label {
+        color: #EDE8DF !important;
+    }
+    .stRadio .st-ae {
+        color: #EDE8DF !important;
+    }
+    .stRadio [data-testid="stRadio"] {
+        color: #EDE8DF !important;
+    }
+    
+    /* Fix checkboxes */
+    .stCheckbox label {
+        color: #EDE8DF !important;
+    }
+    .stCheckbox .st-ae {
+        color: #EDE8DF !important;
+    }
+    
+    /* Fix sliders */
+    .stSlider label {
+        color: #EDE8DF !important;
+    }
+    .stSlider .st-bm {
+        color: #EDE8DF !important;
+    }
+    
+    /* Fix dataframes */
+    .stDataFrame {
+        background: #1A1714 !important;
+    }
+    .stDataFrame table {
+        color: #EDE8DF !important;
+    }
+    .stDataFrame th {
+        background: #2A2420 !important;
+        color: #EDE8DF !important;
+        border-color: #3A3028 !important;
+    }
+    .stDataFrame td {
+        color: #D5CCBF !important;
+        border-color: #2A2420 !important;
+    }
+    .stDataFrame tr:hover td {
+        background: #2A2420 !important;
+    }
+    
+    /* Fix expanders */
+    .streamlit-expanderHeader {
+        color: #EDE8DF !important;
+        background: #2A2420 !important;
+        border-color: #3A3028 !important;
+    }
+    .streamlit-expanderHeader:hover {
+        background: #3A3028 !important;
+    }
+    .streamlit-expanderContent {
+        background: #1A1714 !important;
+        border-color: #3A3028 !important;
+    }
+    
+    /* Fix report container */
+    .report-wrapper {
+        background: #2A2420 !important;
+        border-color: #4A3F37 !important;
+    }
+    .report-container h2 {
+        color: #F5E6D0 !important;
+        border-left-color: #F0997B !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3) !important;
+    }
+    .report-container h3 {
+        color: #E8D5C0 !important;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.2) !important;
+    }
+    .report-container strong {
+        color: #F5A07A !important;
+    }
+    .report-container li {
+        color: #D5CCBF !important;
+    }
+    .report-container p {
+        color: #D5CCBF !important;
+    }
+    .report-container ul {
+        color: #D5CCBF !important;
+        list-style-type: disc !important;
+    }
+    .report-container li::marker {
+        color: #F0997B !important;
+    }
+    .report-container {
+        color: #D5CCBF !important;
+    }
+}
+
 @media (max-width: 768px) {
     .stApp .main .block-container { padding: 1rem !important; }
     h1 { font-size: 1.8rem !important; }
@@ -347,8 +662,14 @@ code, pre {
 </style>
 """, unsafe_allow_html=True)
 
+# ──────────────────────────────────────────────────────────────────────────────
+# INIT SESSION STATE
+# ──────────────────────────────────────────────────────────────────────────────
 init_session()
 
+# ──────────────────────────────────────────────────────────────────────────────
+# SIDEBAR
+# ──────────────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("## 📊 CSV Insight Agents")
     st.markdown("### AI-Powered Analysis")
@@ -401,12 +722,33 @@ with st.sidebar:
             status_style = "color:#3B6D11; background:#EAF3DE; border:1px solid #C0DD97;"
         else:
             status_style = "color:#854F0B; background:#FAEEDA; border:1px solid #FAC775;"
+        
+        # Dark mode overrides for status badges
+        if status == "Ready":
+            status_style_dark = "color:#A0D080; background:#2A4A1A; border:1px solid #3A6A2A;"
+        else:
+            status_style_dark = "color:#FAC775; background:#3A3028; border:1px solid #5A4F45;"
+        
         st.markdown(f"""
         <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0.6rem; background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.06); border-radius:8px; margin-bottom:0.3rem;">
             <span style="font-size:0.9rem; margin-right:0.5rem;">{icon}</span>
-            <span style="font-size:0.78rem; font-weight:500; flex-grow:1;">{name}</span>
+            <span style="font-size:0.78rem; font-weight:500; flex-grow:1; color:#3D3530;">{name}</span>
             <span style="font-size:0.68rem; font-weight:600; padding:2px 7px; border-radius:5px; {status_style}">{status}</span>
         </div>
+        <style>
+        @media (prefers-color-scheme: dark) {{
+            div[style*="display:flex; align-items:center;"] {{
+                background: #2A2420 !important;
+                border-color: #3A3028 !important;
+            }}
+            div[style*="display:flex; align-items:center;"] span {{
+                color: #EDE8DF !important;
+            }}
+            div[style*="display:flex; align-items:center;"] span:last-child {{
+                {status_style_dark}
+            }}
+        }}
+        </style>
         """, unsafe_allow_html=True)
         
     st.markdown("---")
@@ -437,6 +779,9 @@ with st.sidebar:
     st.markdown("---")
     st.caption("💡 Click the ◀ arrow to collapse")
 
+# ──────────────────────────────────────────────────────────────────────────────
+# PAGE ROUTING
+# ──────────────────────────────────────────────────────────────────────────────
 page = st.session_state.current_page
 
 try:
