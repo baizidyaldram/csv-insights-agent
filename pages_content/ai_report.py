@@ -98,8 +98,8 @@ Keep the total under 700 words. No markdown tables whatsoever."""
         clean_report = clean_report_text(st.session_state.ai_report)
 
         st.markdown(
-            f"""<div style="background:#FFFBF5; border:1px solid #FAC775; border-radius:16px;
-                            padding:2rem; line-height:1.75; font-size:0.94rem; color:#3D3530;">
+            f"""<div style="background:#FFFBF5; border:1.5px solid #D85A30; border-radius:16px;
+                            padding:2rem; line-height:1.75; font-size:0.94rem; color:#221E1B;">
             {format_report_html(clean_report)}
             </div>""",
             unsafe_allow_html=True
@@ -143,9 +143,9 @@ def format_report_html(text: str) -> str:
     if not text:
         return "<p>No report content.</p>"
 
-    text = re.sub(r'^## (.*?)$', r'<h2 style="color:#854F0B;font-size:1.3rem;margin-top:1.5rem;margin-bottom:0.5rem;border-left:4px solid #EF9F27;padding-left:0.75rem;">\1</h2>', text, flags=re.MULTILINE)
-    text = re.sub(r'^### (.*?)$', r'<h3 style="color:#BA7517;font-size:1.1rem;margin-top:1rem;margin-bottom:0.4rem;">\1</h3>', text, flags=re.MULTILINE)
-    text = re.sub(r'\*\*(.*?)\*\*', r'<strong style="color:#D85A30;">\1</strong>', text)
+    text = re.sub(r'^## (.*?)$', r'<h2 style="color:#3D2800;font-size:1.3rem;margin-top:1.5rem;margin-bottom:0.5rem;border-left:4px solid #EF9F27;padding-left:0.75rem;">\1</h2>', text, flags=re.MULTILINE)
+    text = re.sub(r'^### (.*?)$', r'<h3 style="color:#5C3800;font-size:1.1rem;margin-top:1rem;margin-bottom:0.4rem;">\1</h3>', text, flags=re.MULTILINE)
+    text = re.sub(r'\*\*(.*?)\*\*', r'<strong style="color:#B83A00;">\1</strong>', text)
     text = re.sub(r'\*(.*?)\*', r'<em>\1</em>', text)
     text = re.sub(r'^[-•]\s+(.*?)$', r'<li style="margin-bottom:0.4rem;">\1</li>', text, flags=re.MULTILINE)
     text = re.sub(r'^[0-9]+\.\s+(.*?)$', r'<li style="margin-bottom:0.4rem;">\1</li>', text, flags=re.MULTILINE)
