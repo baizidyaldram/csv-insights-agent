@@ -336,8 +336,14 @@ def get_base_model(model_name, task_type, random_state):
             elif model_name == "Decision Tree":
                 return DecisionTreeClassifier(max_depth=10, random_state=random_state)
             elif model_name == "XGBoost" and XGB_AVAILABLE:
-                return xgb.XGBClassifier(n_estimators=100, learning_rate=0.1, max_depth=6,
-                                         random_state=random_state, eval_metric='logloss')
+                return xgb.XGBClassifier(
+                    n_estimators=100, 
+                    learning_rate=0.1, 
+                    max_depth=6,
+                    random_state=random_state, 
+                    eval_metric='logloss',
+                    use_label_encoder=False
+                )
             elif model_name == "LightGBM" and LGB_AVAILABLE:
                 return lgb.LGBMClassifier(n_estimators=100, learning_rate=0.1,
                                           random_state=random_state, verbose=-1)
@@ -351,7 +357,13 @@ def get_base_model(model_name, task_type, random_state):
             elif model_name == "Ridge Regression":
                 return Ridge(alpha=1.0, random_state=random_state)
             elif model_name == "XGBoost" and XGB_AVAILABLE:
-                return xgb.XGBRegressor(n_estimators=100, learning_rate=0.1, max_depth=6, random_state=random_state)
+                return xgb.XGBRegressor(
+                    n_estimators=100, 
+                    learning_rate=0.1, 
+                    max_depth=6, 
+                    random_state=random_state,
+                    use_label_encoder=False
+                )
             elif model_name == "LightGBM" and LGB_AVAILABLE:
                 return lgb.LGBMRegressor(n_estimators=100, learning_rate=0.1, random_state=random_state, verbose=-1)
     except Exception as e:
@@ -400,9 +412,9 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
     y = df_clean[target_col].copy()
     log_step(f"Data shape: {X.shape[0]} rows × {X.shape[1]} features")
 
-    # Encode categoricals
+    # Encode categoricals - fix for pandas 3.0
     cat_mappings = {}
-    for col in X.select_dtypes(include="object").columns:
+    for col in X.select_dtypes(include=["object", "string"]).columns:
         X[col] = X[col].fillna("Missing").astype(str)
         le = LabelEncoder()
         X[col] = le.fit_transform(X[col])
@@ -681,7 +693,9 @@ def display_results(task_type):
                     row[k] = round(v, 4)
             rows.append(row)
         if rows:
-            st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
+            # Convert to string to avoid Arrow errors
+            df_display = pd.DataFrame(rows)
+            st.dataframe(df_display, use_container_width=True, hide_index=True)
             st.success(f"💡 **Best Model:** {best_model_name}")
 
     with tab2:
@@ -708,7 +722,9 @@ def display_results(task_type):
             for model_name, params in best_params.items():
                 if params:
                     st.markdown(f"**{model_name}**")
+                    # Convert params to dataframe with string values to avoid Arrow errors
                     param_df = pd.DataFrame(list(params.items()), columns=["Parameter", "Best Value"])
+                    param_df["Best Value"] = param_df["Best Value"].astype(str)
                     st.dataframe(param_df, use_container_width=True, hide_index=True)
                 else:
                     st.info(f"{model_name}: Used default parameters (no grid defined).")
