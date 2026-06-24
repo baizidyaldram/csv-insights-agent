@@ -292,7 +292,7 @@ Be specific and practical. Format as bullet points with clear sections."""
                 detected_task = "regression"
                 st.info(f"💡 Detected: Regression ({unique_count} unique values)")
             else:
-                detected_task = "classification"  # Default
+                detected_task = "classification"
                 st.info(f"💡 Target has {unique_count} values - choose task type below")
         else:
             detected_task = "classification"
@@ -778,7 +778,10 @@ def create_feature_importance_chart(feature_importances, features_list, top_n=10
                           coloraxis_showscale=False)
         return fig
     except Exception:
-        return Nonedef create_confusion_matrix_heatmap(cm_matrix):
+        return None
+
+
+def create_confusion_matrix_heatmap(cm_matrix):
     if not cm_matrix:
         return None
     try:
