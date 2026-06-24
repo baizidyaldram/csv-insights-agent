@@ -361,7 +361,7 @@ with st.sidebar:
         "📊 Statistical Analysis": "stats",
         "📈 Visualization": "visualization",
         "🤖 Modeling & Evaluation": "modeling",
-        "📋 AI Insights & Report": "ai_report",
+        "📋 AI Report": "ai_report",
     }
     
     if "current_page" not in st.session_state:
@@ -393,7 +393,7 @@ with st.sidebar:
         ("Statistical Agent", "Ready" if stats_ready else "Waiting", "📊"),
         ("Visuals Agent", "Ready" if viz_ready else "Waiting", "📈"),
         ("Modeling Agent", "Ready" if modeling_ready else "Waiting", "🤖"),
-        ("AI Insights & Report", "Ready" if report_ready else "Waiting", "📋"),
+        ("AI Report Agent", "Ready" if report_ready else "Waiting", "📋"),
     ]
     
     for name, status, icon in agent_statuses:
