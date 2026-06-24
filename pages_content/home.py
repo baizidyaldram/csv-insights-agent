@@ -7,7 +7,7 @@ from utils.session import set_df, is_data_loaded, get_df
 def render():
     st.markdown("""
     <div style="text-align: center; margin-bottom: 2rem;">
-        <h1>📊 CSV Insight Agents</h1>
+        <h1>🤖 CSV Insights Agents</h1>
         <p style="color: #6B6055; font-size: 1.05rem;">
             Multi-agent AI system for automated data analysis and visualization
         </p>
