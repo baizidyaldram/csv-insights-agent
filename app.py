@@ -4,441 +4,353 @@ import pandas as pd
 import sys
 import os
 
-# Add the current directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# ── Page config ──────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="CSV Insight Agents | AI-Powered Data Analysis",
-    page_icon="🤖",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ── Premium Theme CSS with #1371A0 Color Palette ──────────────────────────
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
-/* Global Reset */
 * {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    margin: 0;
-    padding: 0;
     box-sizing: border-box;
 }
 
-/* Premium Dark Gradient Background with #1371A0 Theme */
+/* ── WARM ADAPTIVE PALETTE ─────────────────────────────── */
+:root {
+    --amber-50:  #FAEEDA;
+    --amber-100: #FAC775;
+    --amber-200: #EF9F27;
+    --amber-400: #BA7517;
+    --amber-600: #854F0B;
+    --amber-800: #633806;
+    --coral-50:  #FAECE7;
+    --coral-100: #F5C4B3;
+    --coral-200: #F0997B;
+    --coral-400: #D85A30;
+    --coral-600: #993C1D;
+    --slate-50:  #F8F5F0;
+    --slate-100: #EDE8DF;
+    --slate-200: #D5CCBF;
+    --slate-400: #9E9385;
+    --slate-600: #6B6055;
+    --slate-800: #3D3530;
+    --slate-900: #221E1B;
+}
+
+/* Light mode */
 .stApp {
-    background: radial-gradient(ellipse at 30% 20%, #1a1a2e, #0b0f1a);
-    background-attachment: fixed;
+    background-color: var(--slate-50);
 }
 
-/* Animated particles effect */
-.stApp::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-        radial-gradient(circle at 20% 40%, rgba(19, 113, 160, 0.15) 0%, transparent 50%),
-        radial-gradient(circle at 80% 60%, rgba(49, 136, 173, 0.12) 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, rgba(19, 113, 160, 0.08) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-}
-
-/* Main content container */
-.main .block-container {
-    padding: 2rem 2rem !important;
+.stApp .main .block-container {
+    padding: 2rem 2.5rem !important;
     max-width: 1200px !important;
     margin: 0 auto !important;
-    background: rgba(18, 18, 35, 0.7);
-    backdrop-filter: blur(20px);
-    border-radius: 32px;
+    background: #FFFFFF;
+    border-radius: 20px;
     margin-top: 1.5rem !important;
     margin-bottom: 1.5rem !important;
-    border: 1px solid rgba(19, 113, 160, 0.2);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--slate-100);
+    box-shadow: 0 2px 12px rgba(61,53,48,0.06);
 }
 
-/* Hide Streamlit Branding */
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+    .stApp { background-color: #1A1714 !important; }
+    .stApp .main .block-container {
+        background: #241F1B !important;
+        border-color: #3A3028 !important;
+        box-shadow: 0 2px 20px rgba(0,0,0,0.4) !important;
+    }
+}
+
 #MainMenu, footer, header { visibility: hidden; }
 
-/* ============ SIDEBAR STYLING ============ */
+/* ── SIDEBAR ────────────────────────────────────────────── */
 [data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #12121f 0%, #0a0a14 100%);
-    border-right: 1px solid rgba(19, 113, 160, 0.2);
+    background: #FFF8F0;
+    border-right: 1px solid var(--slate-100);
 }
 
-[data-testid="stSidebar"] * {
-    color: #e2e2f0 !important;
+@media (prefers-color-scheme: dark) {
+    [data-testid="stSidebar"] {
+        background: #1E1915 !important;
+        border-right-color: #3A3028 !important;
+    }
 }
 
-[data-testid="stSidebar"] .stMarkdown h1,
-[data-testid="stSidebar"] .stMarkdown h2,
-[data-testid="stSidebar"] .stMarkdown h3 {
-    color: #ffffff !important;
-}
-
-/* Sidebar buttons */
 [data-testid="stSidebar"] .stButton button {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(19, 113, 160, 0.2);
-    border-radius: 12px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
     text-align: left;
-    padding: 0.7rem 1rem;
-    transition: all 0.25s ease;
+    padding: 0.6rem 1rem;
+    transition: all 0.2s ease;
     font-weight: 500;
+    color: var(--slate-800);
 }
 
 [data-testid="stSidebar"] .stButton button:hover {
-    background: rgba(19, 113, 160, 0.15);
-    border-color: rgba(49, 136, 173, 0.4);
-    transform: translateX(4px);
+    background: var(--amber-50);
+    border-color: var(--amber-100);
 }
 
 [data-testid="stSidebar"] .stButton button[data-testid="baseButton-primary"] {
-    background: linear-gradient(135deg, #1371A0, #3188AD);
-    border: none;
-    box-shadow: 0 4px 12px rgba(19, 113, 160, 0.3);
+    background: var(--amber-200);
+    border-color: var(--amber-400);
+    color: #fff !important;
+    font-weight: 600;
 }
 
-/* ============ CARD STYLES ============ */
+/* ── AGENT CARDS ────────────────────────────────────────── */
 .agent-card {
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(19, 113, 160, 0.2);
-    border-radius: 16px;
-    padding: 1rem 1.25rem;
-    margin-bottom: 0.75rem;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--slate-50);
+    border: 1px solid var(--slate-100);
+    border-radius: 14px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.65rem;
+    transition: all 0.25s ease;
 }
 
 .agent-card:hover {
-    transform: translateY(-3px);
-    border-color: rgba(49, 136, 173, 0.5);
-    background: linear-gradient(135deg, rgba(19, 113, 160, 0.08), rgba(49, 136, 173, 0.04));
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border-color: var(--amber-100);
+    background: var(--amber-50);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(186,117,23,0.1);
 }
 
 .agent-card h4 {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    margin-bottom: 0.25rem;
-    background: linear-gradient(135deg, #ffffff, #77B4C7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin-bottom: 0.2rem;
+    color: var(--slate-800);
 }
 
 .agent-card p {
-    font-size: 0.8rem;
-    color: #a0a0c0;
+    font-size: 0.78rem;
+    color: var(--slate-400);
     margin: 0;
 }
 
-/* ============ METRIC CARDS ============ */
+/* Dark mode cards */
+@media (prefers-color-scheme: dark) {
+    .agent-card { background: #2A2420; border-color: #3A3028; }
+    .agent-card h4 { color: #EDE8DF; }
+    .agent-card:hover { background: #352B22; border-color: var(--amber-600); }
+}
+
+/* ── METRIC CARDS ───────────────────────────────────────── */
 .metric-card {
-    background: linear-gradient(135deg, rgba(19, 113, 160, 0.1), rgba(49, 136, 173, 0.05));
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(19, 113, 160, 0.2);
-    border-radius: 20px;
+    background: var(--amber-50);
+    border: 1px solid var(--amber-100);
+    border-radius: 16px;
     padding: 1.2rem;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.25s ease;
 }
 
 .metric-card:hover {
-    transform: translateY(-4px);
-    border-color: rgba(49, 136, 173, 0.5);
-    background: linear-gradient(135deg, rgba(19, 113, 160, 0.15), rgba(49, 136, 173, 0.08));
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(186,117,23,0.12);
 }
 
 .metric-value {
-    font-size: 2.2rem;
+    font-size: 2rem;
     font-weight: 800;
-    background: linear-gradient(135deg, #ffffff, #77B4C7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--amber-600);
 }
 
 .metric-label {
-    font-size: 0.7rem;
-    color: #a0a0c0;
+    font-size: 0.68rem;
+    color: var(--slate-400);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-top: 0.5rem;
+    letter-spacing: 0.07em;
+    margin-top: 0.4rem;
     font-weight: 500;
 }
 
-/* ============ BUTTON STYLES ============ */
+/* ── BUTTONS ────────────────────────────────────────────── */
 .stButton > button {
-    background: linear-gradient(135deg, #1371A0, #3188AD);
-    color: white;
+    background: var(--amber-200);
+    color: white !important;
     border: none;
-    border-radius: 14px;
+    border-radius: 12px;
     font-weight: 600;
-    padding: 0.6rem 1.5rem;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(19, 113, 160, 0.3);
+    padding: 0.55rem 1.4rem;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(186,117,23,0.2);
 }
 
 .stButton > button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(19, 113, 160, 0.4);
-    background: linear-gradient(135deg, #3188AD, #529EBA);
+    background: var(--amber-400) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(186,117,23,0.3);
 }
 
-/* Secondary button */
 .stButton > button[data-testid="baseButton-secondary"] {
-    background: rgba(255, 255, 255, 0.05);
+    background: transparent !important;
+    color: var(--slate-600) !important;
+    border: 1px solid var(--slate-200) !important;
     box-shadow: none;
-    border: 1px solid rgba(19, 113, 160, 0.2);
 }
 
 .stButton > button[data-testid="baseButton-secondary"]:hover {
-    background: rgba(19, 113, 160, 0.15);
-    border-color: rgba(49, 136, 173, 0.4);
+    background: var(--amber-50) !important;
+    border-color: var(--amber-100) !important;
 }
 
-/* ============ TYPOGRAPHY ============ */
+/* ── TYPOGRAPHY ─────────────────────────────────────────── */
 h1 {
-    font-size: 2.8rem !important;
+    font-size: 2.4rem !important;
     font-weight: 800 !important;
-    background: linear-gradient(135deg, #ffffff, #77B4C7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
-    margin-bottom: 0.5rem !important;
+    color: var(--slate-800) !important;
     letter-spacing: -0.02em;
+    margin-bottom: 0.4rem !important;
 }
 
 h2 {
-    font-size: 1.5rem !important;
+    font-size: 1.4rem !important;
     font-weight: 700 !important;
-    background: linear-gradient(135deg, #ffffff, #77B4C7);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: var(--slate-800) !important;
     margin-top: 1rem !important;
-    margin-bottom: 0.75rem !important;
+    margin-bottom: 0.6rem !important;
 }
 
 h3 {
-    font-size: 1.2rem !important;
+    font-size: 1.1rem !important;
     font-weight: 600 !important;
-    color: #e2e2f0 !important;
-    margin-bottom: 0.5rem !important;
+    color: var(--slate-600) !important;
+    margin-bottom: 0.4rem !important;
 }
 
-p, .stMarkdown {
-    color: #c0c0e0;
-    line-height: 1.6;
+@media (prefers-color-scheme: dark) {
+    h1, h2 { color: #EDE8DF !important; }
+    h3 { color: #C8BFB4 !important; }
 }
 
-/* ============ DATAFRAME STYLING ============ */
-[data-testid="stDataFrame"] {
-    background: rgba(0, 0, 0, 0.3);
-    border-radius: 16px;
-    border: 1px solid rgba(19, 113, 160, 0.15);
-}
-
-[data-testid="stDataFrame"] table {
-    color: #e2e2f0;
-}
-
-/* ============ FILE UPLOADER ============ */
-[data-testid="stFileUploader"] {
-    background: rgba(255, 255, 255, 0.02);
-    border: 2px dashed rgba(19, 113, 160, 0.3);
-    border-radius: 20px;
-    padding: 2rem;
-    transition: all 0.3s ease;
-}
-
-[data-testid="stFileUploader"]:hover {
-    border-color: rgba(49, 136, 173, 0.6);
-    background: rgba(19, 113, 160, 0.05);
-}
-
-/* ============ EXPANDER ============ */
-[data-testid="stExpander"] {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(19, 113, 160, 0.15);
-    border-radius: 12px;
-}
-
-[data-testid="stExpander"] details {
-    background: transparent;
-}
-
-/* ============ TABS ============ */
+/* ── TABS ───────────────────────────────────────────────── */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 0.5rem;
-    background: rgba(255, 255, 255, 0.03);
-    padding: 0.5rem;
-    border-radius: 60px;
+    gap: 0.4rem;
+    background: var(--slate-50);
+    padding: 0.4rem;
+    border-radius: 50px;
+    border: 1px solid var(--slate-100);
 }
 
 .stTabs [data-baseweb="tab"] {
     border-radius: 50px;
-    padding: 0.5rem 1.5rem;
+    padding: 0.45rem 1.2rem;
     font-weight: 500;
-    color: #a0a0c0;
+    color: var(--slate-400);
 }
 
 .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #1371A0, #3188AD);
-    color: white;
+    background: var(--amber-200) !important;
+    color: white !important;
 }
 
-/* ============ PROGRESS BAR ============ */
+/* ── PROGRESS ───────────────────────────────────────────── */
 .stProgress > div > div {
-    background: linear-gradient(90deg, #1371A0, #3188AD);
+    background: var(--amber-200);
 }
 
-/* ============ ALERTS ============ */
+/* ── ALERTS ─────────────────────────────────────────────── */
 .stAlert {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(19, 113, 160, 0.2) !important;
     border-radius: 12px !important;
-    color: #e2e2f0 !important;
+    border-left: 4px solid var(--amber-200) !important;
 }
 
-.stAlert [data-testid="stMarkdown"] {
-    color: #e2e2f0 !important;
+/* ── FILE UPLOADER ──────────────────────────────────────── */
+[data-testid="stFileUploader"] {
+    border: 2px dashed var(--amber-100);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.2s ease;
 }
 
-/* ============ BADGES ============ */
-.badge-ready {
-    background: linear-gradient(135deg, #1371A0, #2E7C9E);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    display: inline-block;
-    color: white !important;
+[data-testid="stFileUploader"]:hover {
+    border-color: var(--amber-200);
+    background: var(--amber-50);
 }
 
-.badge-waiting {
-    background: linear-gradient(135deg, #f59e0b, #fbbf24);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    display: inline-block;
-    color: white !important;
-}
-
-/* ============ DIVIDER ============ */
+/* ── DIVIDERS ────────────────────────────────────────────── */
 hr {
     margin: 1.5rem 0;
     border: none;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(19, 113, 160, 0.3), transparent);
+    background: linear-gradient(90deg, transparent, var(--slate-200), transparent);
 }
 
-/* ============ SCROLLBAR ============ */
-::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+/* ── SCROLLBAR ───────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--slate-50); border-radius: 10px; }
+::-webkit-scrollbar-thumb { background: var(--amber-100); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: var(--amber-200); }
+
+/* ── BADGES ──────────────────────────────────────────────── */
+.badge-ready {
+    background: #EAF3DE;
+    color: #3B6D11;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
 }
 
-::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 10px;
+.badge-waiting {
+    background: var(--amber-50);
+    color: var(--amber-600);
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    display: inline-block;
 }
 
-::-webkit-scrollbar-thumb {
-    background: linear-gradient(135deg, #1371A0, #3188AD);
-    border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(135deg, #3188AD, #529EBA);
-}
-
-/* ============ CODE BLOCKS ============ */
+/* ── CODE ────────────────────────────────────────────────── */
 code, pre {
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--slate-50);
     border-radius: 8px;
-    padding: 0.2rem 0.4rem;
-    font-family: 'Monaco', 'Menlo', monospace;
-    font-size: 0.85rem;
-    color: #77B4C7;
+    border: 1px solid var(--slate-100);
+    color: var(--coral-600);
 }
 
-/* ============ SELECT BOX ============ */
-[data-baseweb="select"] {
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
+/* ── SELECT / INPUT ─────────────────────────────────────── */
+[data-baseweb="select"] { border-radius: 10px; }
+[data-testid="stTextInput"] input, [data-testid="stTextArea"] textarea {
+    border: 1px solid var(--slate-200);
+    border-radius: 10px;
+}
+[data-testid="stTextInput"] input:focus, [data-testid="stTextArea"] textarea:focus {
+    border-color: var(--amber-200);
+    box-shadow: 0 0 0 2px rgba(239,159,39,0.15);
 }
 
-[data-baseweb="select"] * {
-    color: #e2e2f0;
-}
-
-/* ============ TEXT INPUT ============ */
-[data-testid="stTextInput"] input {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(19, 113, 160, 0.2);
-    border-radius: 12px;
-    color: #e2e2f0;
-}
-
-[data-testid="stTextInput"] input:focus {
-    border-color: #1371A0;
-    box-shadow: 0 0 0 2px rgba(19, 113, 160, 0.2);
-}
-
-/* ============ TEXT AREA ============ */
-[data-testid="stTextArea"] textarea {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(19, 113, 160, 0.2);
-    border-radius: 12px;
-    color: #e2e2f0;
-}
-
-/* ============ MULTISELECT ============ */
 [data-baseweb="tag"] {
-    background: rgba(19, 113, 160, 0.2);
+    background: var(--amber-50);
     border-radius: 8px;
 }
 
-/* ============ SLIDER ============ */
-[data-testid="stSlider"] {
-    color: #1371A0;
-}
-
-/* Responsive Design */
 @media (max-width: 768px) {
-    .main .block-container {
-        padding: 1rem !important;
-        margin: 0.5rem !important;
-    }
-    
-    h1 {
-        font-size: 2rem !important;
-    }
-    
-    .metric-value {
-        font-size: 1.5rem !important;
-    }
+    .stApp .main .block-container { padding: 1rem !important; }
+    h1 { font-size: 1.8rem !important; }
+    .metric-value { font-size: 1.4rem !important; }
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ── Session init ──────────────────────────────────────────────────────────────
 init_session()
 
-# ── Sidebar Navigation ────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🤖 CSV Agent Analyzer")
+    st.markdown("## 📊 CSV Insight Agents")
     st.markdown("### AI-Powered Analysis")
     st.markdown("---")
     
@@ -465,8 +377,6 @@ with st.sidebar:
             st.rerun()
     
     st.markdown("---")
-    
-    # ── Agent Directory Panel ─────────────────────────────────────────────────
     st.markdown("### 🤖 Agent Directory")
     
     quality_ready = st.session_state.get("quality_report") is not None
@@ -487,22 +397,24 @@ with st.sidebar:
     ]
     
     for name, status, icon in agent_statuses:
-        status_color = "color:#2E7C9E; background:rgba(46,124,158,0.12); border:1px solid rgba(46,124,158,0.2);" if status == "Ready" else "color:#64748b; background:rgba(148,163,184,0.06); border:1px solid rgba(148,163,184,0.15);"
+        if status == "Ready":
+            status_style = "color:#3B6D11; background:#EAF3DE; border:1px solid #C0DD97;"
+        else:
+            status_style = "color:#854F0B; background:#FAEEDA; border:1px solid #FAC775;"
         st.markdown(f"""
-        <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.45rem 0.6rem; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 6px; margin-bottom: 0.3rem;">
-            <span style="font-size: 0.9rem; margin-right: 0.5rem;">{icon}</span>
-            <span style="font-size: 0.78rem; font-weight: 500; color: #94a3b8; flex-grow: 1;">{name}</span>
-            <span style="font-size: 0.68rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; {status_color}">{status}</span>
+        <div style="display:flex; align-items:center; justify-content:space-between; padding:0.4rem 0.6rem; background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.06); border-radius:8px; margin-bottom:0.3rem;">
+            <span style="font-size:0.9rem; margin-right:0.5rem;">{icon}</span>
+            <span style="font-size:0.78rem; font-weight:500; flex-grow:1;">{name}</span>
+            <span style="font-size:0.68rem; font-weight:600; padding:2px 7px; border-radius:5px; {status_style}">{status}</span>
         </div>
         """, unsafe_allow_html=True)
         
     st.markdown("---")
     
-    # ── API Key configurator ──────────────────────────────────────────────────
     from utils.llm import get_api_key
     if not get_api_key():
         st.markdown("### 🔑 OpenRouter API Key")
-        api_key_input = st.text_input("Enter Key", type="password", help="Provide your OpenRouter API key to activate the AI Insights and Report Writing agents.")
+        api_key_input = st.text_input("Enter Key", type="password", help="Required for AI Insights & Report agents.")
         if api_key_input:
             st.session_state.openrouter_api_key = api_key_input
             st.rerun()
@@ -525,39 +437,30 @@ with st.sidebar:
     st.markdown("---")
     st.caption("💡 Click the ◀ arrow to collapse")
 
-# ── Page Router ───────────────────────────────────────────────────────────────
 page = st.session_state.current_page
 
-# ── Page Router - NO report tables anywhere ──────────────────────────────────
 try:
     if page == "home":
         from pages_content.home import render
         render()
-        
     elif page == "quality":
         from pages_content.quality import render
         render()
-        
     elif page == "cleaning":
         from pages_content.cleaning import render
         render()
-        
     elif page == "stats":
         from pages_content.stats import render
         render()
-        
     elif page == "visualization":
         from pages_content.visualization import render
         render()
-        
     elif page == "modeling":
         from pages_content.modeling import render
         render()
-        
     elif page == "ai_report":
         from pages_content.ai_report import render
         render()
-        
 except ImportError as e:
     st.error(f"Page not found: {e}")
     st.info("Please ensure all page files exist in the 'pages_content' folder")
