@@ -182,8 +182,7 @@ def get_base_model(model_name, task_type, random_state):
                     learning_rate=0.1,
                     max_depth=6,
                     random_state=random_state,
-                    eval_metric='logloss',
-                    use_label_encoder=False
+                    eval_metric='logloss'
                 )
             elif model_name == "LightGBM" and LGB_AVAILABLE:
                 return lgb.LGBMClassifier(n_estimators=100, learning_rate=0.1,
@@ -202,8 +201,7 @@ def get_base_model(model_name, task_type, random_state):
                     n_estimators=100,
                     learning_rate=0.1,
                     max_depth=6,
-                    random_state=random_state,
-                    use_label_encoder=False
+                    random_state=random_state
                 )
             elif model_name == "LightGBM" and LGB_AVAILABLE:
                 return lgb.LGBMRegressor(n_estimators=100, learning_rate=0.1, random_state=random_state, verbose=-1)
@@ -230,7 +228,9 @@ def tune_model(model, model_name, task_type, X_train, y_train, cv_folds, log_ste
     log_step(f"⚠️ This may take a while...")
 
     try:
-        gs = GridSearchCV(model, param_grid, cv=cv_folds, scoring=scoring,
+        # Use fewer folds for small datasets
+        actual_folds = min(cv_folds, 3)
+        gs = GridSearchCV(model, param_grid, cv=actual_folds, scoring=scoring,
                           n_jobs=-1, refit=True, error_score="raise")
         gs.fit(X_train, y_train)
         log_step(f"Best params for {model_name}: {gs.best_params_}  |  Best CV {scoring}: {gs.best_score_:.4f}")
@@ -347,6 +347,7 @@ def create_feature_importance_chart(feature_importances, features_list, top_n=10
 
 
 def create_confusion_matrix_heatmap(cm_matrix):
+    """Create confusion matrix heatmap."""
     if not cm_matrix:
         return None
     try:
@@ -578,12 +579,24 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
             y_pred = model.predict(X_test)
             m = calculate_metrics(y_test, y_pred, task_type, model, X_test)
 
-            # Cross-validation only if enabled
+            # Cross-validation only if enabled and enough samples
             if use_cv:
                 try:
                     scoring_str = "accuracy" if task_type == "classification" else "r2"
-                    # Use fewer folds for small datasets
-                    actual_folds = min(cv_folds, len(np.unique(y_train)) if task_type == "classification" else cv_folds)
+                    
+                    # Calculate safe CV folds - ensure each class has at least 2 samples
+                    if task_type == "classification":
+                        from collections import Counter
+                        class_counts = Counter(y_train)
+                        min_class_size = min(class_counts.values())
+                        # Use at most min_class_size folds, but no more than cv_folds
+                        actual_folds = min(cv_folds, min_class_size)
+                        # Ensure at least 2 folds
+                        actual_folds = max(2, actual_folds)
+                    else:
+                        actual_folds = min(cv_folds, len(y_train) // 5)
+                        actual_folds = max(2, min(5, actual_folds))
+                    
                     if actual_folds >= 2:
                         cv_sc = cross_val_score(model, X_train, y_train,
                                                 cv=actual_folds, scoring=scoring_str)
@@ -843,7 +856,6 @@ def render():
     # AI Recommendation button
     if st.button("🧠 Get AI Recommendations for This Dataset", use_container_width=False):
         with st.spinner("Analyzing dataset..."):
-            # Build recommendation prompt
             sample_data = df.head(5).to_string()
 
             prompt = f"""Analyze this dataset and provide recommendations for machine learning modeling.
@@ -881,7 +893,6 @@ Format your response with clear headings and bullet points. Be specific and prac
     if st.session_state.get("ai_modeling_recommendation"):
         st.markdown("---")
 
-        # Get and format the recommendation text
         rec_text = st.session_state.ai_modeling_recommendation
         formatted_rec = format_ai_recommendation(rec_text)
 
@@ -892,7 +903,6 @@ Format your response with clear headings and bullet points. Be specific and prac
             unsafe_allow_html=True
         )
 
-        # Action buttons after recommendation
         col1, col2, col3 = st.columns([1, 1, 1])
         with col1:
             if st.button("✅ Apply Recommendations", use_container_width=True):
@@ -919,7 +929,6 @@ Format your response with clear headings and bullet points. Be specific and prac
         unique_count = df[target_col].nunique()
         is_numeric_target = target_col in numeric_cols
 
-        # Smart task detection
         if is_numeric_target:
             if unique_count <= 10:
                 detected_task = "classification"
@@ -991,7 +1000,6 @@ Format your response with clear headings and bullet points. Be specific and prac
     st.markdown("### 🔬 Hyperparameter Tuning")
     tune_col1, tune_col2 = st.columns([1, 2])
     with tune_col1:
-        # Smart GridSearchCV recommendation
         grid_recommended = "✅ Recommended" if n_rows > 200 else "⚠️ Not recommended (small dataset - use defaults)"
         enable_tuning = st.checkbox(f"Enable GridSearchCV ({grid_recommended})", value=n_rows > 200,
                                     help="Searches over a pre-defined parameter grid. Adds training time.")
