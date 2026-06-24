@@ -96,9 +96,7 @@ def render():
     # ── CUSTOM CSS FOR DARK MODE CONTRAST ──────────────────────────────────
     st.markdown("""
     <style>
-    /* Fix contrast for modeling page in dark mode */
     @media (prefers-color-scheme: dark) {
-        /* Multiselect fix */
         [data-baseweb="select"] [data-testid="stMultiSelect"] {
             background: #2A2420 !important;
             border-color: #4A3F37 !important;
@@ -127,32 +125,14 @@ def render():
         [data-baseweb="tag"] span {
             color: #EDE8DF !important;
         }
-        /* Radio buttons */
-        .stRadio label {
+        .stRadio label, .stCheckbox label, .stSlider label {
             color: #EDE8DF !important;
         }
-        .stRadio .st-ae {
-            color: #EDE8DF !important;
-        }
-        /* Checkboxes */
-        .stCheckbox label {
-            color: #EDE8DF !important;
-        }
-        /* Selectbox */
-        [data-baseweb="select"] .st-bm {
-            color: #EDE8DF !important;
-        }
-        /* Number input */
         .stNumberInput input {
             color: #EDE8DF !important;
             background: #2A2420 !important;
             border-color: #4A3F37 !important;
         }
-        /* Slider labels */
-        .stSlider label {
-            color: #EDE8DF !important;
-        }
-        /* Info boxes */
         .stAlert {
             background: #2A2420 !important;
             color: #EDE8DF !important;
@@ -160,7 +140,6 @@ def render():
         .stAlert p {
             color: #EDE8DF !important;
         }
-        /* Dataframe */
         .stDataFrame {
             background: #1A1714 !important;
         }
@@ -174,7 +153,6 @@ def render():
         .stDataFrame td {
             color: #D5CCBF !important;
         }
-        /* Tabs */
         .stTabs [data-baseweb="tab-list"] {
             background: #2A2420 !important;
             border-color: #3A3028 !important;
@@ -186,12 +164,22 @@ def render():
             background: #EF9F27 !important;
             color: #1A1714 !important;
         }
+        .recommendation-box {
+            background: #2A2420 !important;
+            border-color: #4A3F37 !important;
+        }
+        .recommendation-box h4 {
+            color: #F5E6D0 !important;
+        }
+        .recommendation-box p, .recommendation-box li {
+            color: #D5CCBF !important;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
 
     st.markdown("## 🤖 Modeling & Evaluation Agent")
-    st.markdown("Train machine learning models — with optional hyperparameter tuning via GridSearchCV.")
+    st.markdown("Train machine learning models — with AI-powered recommendations for your dataset.")
 
     if not is_data_loaded():
         st.warning("No data loaded. Please upload a CSV on the Home page first.")
@@ -211,6 +199,80 @@ def render():
         st.error("❌ The dataset must have at least 2 columns.")
         return
 
+    # ── AI Recommendation Section ──────────────────────────────────────────
+    st.markdown("### 🤖 AI-Powered Recommendation")
+    
+    # Get dataset stats for recommendation
+    n_rows = len(df)
+    n_cols = len(df.columns)
+    n_numeric = len(numeric_cols)
+    n_categorical = len(df.select_dtypes(include=["object", "string", "category"]).columns)
+    missing_pct = (df.isnull().sum().sum() / df.size * 100) if df.size > 0 else 0
+    
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Rows", f"{n_rows:,}")
+    with col2:
+        st.metric("Columns", n_cols)
+    with col3:
+        st.metric("Numeric", n_numeric)
+    with col4:
+        st.metric("Missing", f"{missing_pct:.1f}%")
+    
+    # AI Recommendation button
+    if st.button("🧠 Get AI Recommendations for This Dataset", use_container_width=False):
+        with st.spinner("Analyzing dataset..."):
+            # Build recommendation prompt
+            sample_data = df.head(5).to_string()
+            target_options = ", ".join(all_cols[:10]) + ("..." if len(all_cols) > 10 else "")
+            
+            prompt = f"""Analyze this dataset and provide recommendations for machine learning modeling.
+
+Dataset Info:
+- {n_rows} rows, {n_cols} columns
+- {n_numeric} numeric columns, {n_categorical} categorical columns
+- {missing_pct:.1f}% missing values
+
+Columns: {', '.join(all_cols[:15])}{'...' if len(all_cols) > 15 else ''}
+
+Sample data:
+{sample_data}
+
+Please recommend:
+1. **Task Type**: Should this be Classification or Regression? Explain why based on the data.
+2. **Target Variable**: Which column should be the target (Y)? Explain your choice.
+3. **Cross-Validation**: Should we use CV? Yes/No - explain based on dataset size.
+4. **Hyperparameter Tuning**: Should we use GridSearchCV? Yes/No - explain.
+5. **Best Model Types**: Which 2-3 algorithms would likely work best?
+6. **Feature Scaling**: Should we scale features? Yes/No - explain.
+
+Be specific and practical. Format as bullet points with clear sections."""
+            
+            try:
+                recommendation = call_llm(prompt, "You are a senior ML engineer providing practical modeling advice.", max_tokens=800)
+                st.session_state.ai_modeling_recommendation = recommendation
+                st.success("✅ Recommendation generated!")
+                st.rerun()
+            except Exception as e:
+                st.error(f"Error generating recommendation: {e}")
+    
+    # Display recommendation if available
+    if st.session_state.get("ai_modeling_recommendation"):
+        st.markdown("---")
+        st.markdown("#### 📋 AI Recommendation")
+        st.markdown(
+            f"""<div class="recommendation-box" style="background:#FFFBF5;border:1.5px solid #EF9F27;border-radius:12px;
+                            padding:1.5rem;line-height:1.7;font-size:0.95rem;">
+            {st.session_state.ai_modeling_recommendation}
+            </div>""",
+            unsafe_allow_html=True
+        )
+        st.markdown("---")
+        if st.button("Use These Recommendations", use_container_width=False):
+            st.success("✅ Recommendations applied! Configure below or click Run Modeling.")
+    
+    st.markdown("---")
+
     # ── Pipeline Configuration ────────────────────────────────────────────────
     st.markdown("### ⚙️ Pipeline Configuration")
     col_target, col_features = st.columns([1, 2])
@@ -220,7 +282,22 @@ def render():
         target_col = st.selectbox("Select Target Variable (Y)", all_cols)
         unique_count = df[target_col].nunique()
         is_numeric_target = target_col in numeric_cols
-        detected_task = "regression" if (is_numeric_target and unique_count > 12) else "classification"
+        
+        # Smart task detection
+        if is_numeric_target:
+            if unique_count <= 10:
+                detected_task = "classification"
+                st.info(f"💡 Detected: Classification ({unique_count} unique values)")
+            elif unique_count > 20:
+                detected_task = "regression"
+                st.info(f"💡 Detected: Regression ({unique_count} unique values)")
+            else:
+                detected_task = "classification"  # Default
+                st.info(f"💡 Target has {unique_count} values - choose task type below")
+        else:
+            detected_task = "classification"
+            st.info("💡 Categorical target → Classification")
+        
         task_type = st.radio(
             "Task Type",
             ["classification", "regression"],
@@ -251,15 +328,22 @@ def render():
     with col_split:
         test_size = st.slider("Test Split Size (%)", 10, 40, 20, 5) / 100.0
         random_state = st.number_input("Random Seed", value=42, step=1)
-        use_cv = st.checkbox("Enable Cross-Validation", value=False)
-        cv_folds = st.number_input("CV Folds", min_value=2, max_value=10, value=5, disabled=not use_cv)
+        
+        # Smart CV recommendation
+        cv_recommended = "✅ Recommended" if n_rows > 100 else "⚠️ Not recommended (small dataset)"
+        use_cv = st.checkbox(f"Enable Cross-Validation ({cv_recommended})", value=n_rows > 100)
+        cv_folds = st.number_input("CV Folds", min_value=2, max_value=10, value=min(5, n_rows//20 if n_rows > 50 else 3), 
+                                  disabled=not use_cv)
 
     with col_scale:
         scaling_method = st.selectbox("Feature Scaling", ["StandardScaler", "MinMaxScaler", "None"])
+        st.caption("💡 Scale if features have different units")
 
     with col_extra:
         if task_type == "classification" and SMOTE_AVAILABLE:
             handle_imbalance = st.checkbox("Handle Class Imbalance (SMOTE)", value=False)
+            if handle_imbalance:
+                st.caption("⚠️ Only for classification with imbalanced classes")
         else:
             handle_imbalance = False
             if task_type == "classification" and not SMOTE_AVAILABLE:
@@ -271,15 +355,17 @@ def render():
     st.markdown("### 🔬 Hyperparameter Tuning")
     tune_col1, tune_col2 = st.columns([1, 2])
     with tune_col1:
-        enable_tuning = st.checkbox("Enable GridSearchCV", value=False,
+        # Smart GridSearchCV recommendation
+        grid_recommended = "✅ Recommended" if n_rows > 200 else "⚠️ Not recommended (small dataset - use defaults)"
+        enable_tuning = st.checkbox(f"Enable GridSearchCV ({grid_recommended})", value=n_rows > 200,
                                     help="Searches over a pre-defined parameter grid. Adds training time.")
     with tune_col2:
         if enable_tuning:
             tune_cv = st.slider("Tuning CV Folds", 2, 5, 3)
-            st.caption("⚠️ More folds = more accurate but slower. Start with 3 for large datasets.")
+            st.caption("⚠️ More folds = more accurate but slower. Use 2-3 for large datasets.")
         else:
             tune_cv = 3
-            st.caption("Enable GridSearchCV above to auto-tune model hyperparameters.")
+            st.caption("💡 GridSearchCV disabled. Models will use default parameters.")
 
     st.markdown("---")
 
@@ -311,6 +397,20 @@ def render():
     if not selected_model_names:
         st.warning("⚠️ Please select at least one algorithm.")
         return
+
+    # ── Smart Settings Summary ──────────────────────────────────────────────
+    with st.expander("📊 Settings Summary"):
+        st.markdown(f"""
+        - **Task**: {task_type.upper()}
+        - **Target**: {target_col}
+        - **Features**: {len(features_list)} columns
+        - **Test Size**: {test_size*100:.0f}%
+        - **Cross-Validation**: {'✅ Enabled' if use_cv else '❌ Disabled'} ({cv_folds} folds)
+        - **GridSearchCV**: {'✅ Enabled' if enable_tuning else '❌ Disabled'}
+        - **Feature Scaling**: {scaling_method}
+        - **SMOTE**: {'✅ Enabled' if handle_imbalance else '❌ Disabled'}
+        - **Dataset Size**: {n_rows} rows
+        """)
 
     train_clicked = st.button("🚀 Run Modeling & Evaluation", use_container_width=True, type="primary")
 
@@ -381,7 +481,12 @@ def tune_model(model, model_name, task_type, X_train, y_train, cv_folds, log_ste
         return model
 
     scoring = "accuracy" if task_type == "classification" else "r2"
-    log_step(f"GridSearchCV for {model_name} ({len(list(__import__('itertools').product(*param_grid.values())))} combos, {cv_folds}-fold)...")
+    
+    # Calculate number of combinations
+    from itertools import product
+    n_combos = len(list(product(*param_grid.values())))
+    log_step(f"GridSearchCV for {model_name} ({n_combos} combos, {cv_folds}-fold)...")
+    log_step(f"⚠️ This may take a while...")
 
     try:
         gs = GridSearchCV(model, param_grid, cv=cv_folds, scoring=scoring,
@@ -406,11 +511,12 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
         st.session_state.modeling_log.append(f"[{t}] {msg}")
 
     log_step(f"Starting: target='{target_col}' ({task_type})")
+    log_step(f"Dataset: {len(df)} rows, {len(features_list)} features")
 
     df_clean = df.dropna(subset=[target_col]).copy()
     X = df_clean[features_list].copy()
     y = df_clean[target_col].copy()
-    log_step(f"Data shape: {X.shape[0]} rows × {X.shape[1]} features")
+    log_step(f"After dropping NA: {X.shape[0]} rows")
 
     # Encode categoricals - fix for pandas 3.0
     cat_mappings = {}
@@ -427,22 +533,32 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
         y = le_y.fit_transform(y)
         y_inverse_mapping = {i: label for i, label in enumerate(le_y.classes_)}
         log_step(f"Encoded target → {len(le_y.classes_)} classes")
+        
+        # Check class balance
+        from collections import Counter
+        class_counts = Counter(y)
+        log_step(f"Class distribution: {dict(class_counts)}")
+        if min(class_counts.values()) < 5:
+            log_step("⚠️ Some classes have very few samples (<5) - results may be unreliable")
 
-    # Only stratify for classification AND when every class has ≥2 members
+    # Stratify only for classification with balanced classes
     stratify = None
     if task_type == "classification":
         from collections import Counter
         class_counts = Counter(y)
-        if min(class_counts.values()) >= 2:
+        if min(class_counts.values()) >= 2 and len(class_counts) <= 20:
             stratify = y
+            log_step("✅ Using stratified split")
         else:
-            log_step("⚠️ Some classes have <2 samples — stratification disabled.")
+            log_step("⚠️ Stratification disabled - class imbalance or too many classes")
 
+    # Train-test split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state, stratify=stratify
     )
     log_step(f"Train: {len(X_train)} | Test: {len(X_test)}")
 
+    # Feature scaling
     scaler = None
     num_cols = X_train.select_dtypes(include="number").columns.tolist()
     if scaling_method != "None" and num_cols:
@@ -455,11 +571,15 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
             log_step(f"⚠️ Scaling failed: {e}")
             scaler = None
 
+    # SMOTE for imbalance
     if handle_imbalance and task_type == "classification" and SMOTE_AVAILABLE:
         try:
+            from collections import Counter
+            before = Counter(y_train)
             smote = SMOTE(random_state=random_state)
             X_train, y_train = smote.fit_resample(X_train, y_train)
-            log_step(f"SMOTE applied → {len(X_train)} rows")
+            after = Counter(y_train)
+            log_step(f"SMOTE applied: {before} → {after}")
         except Exception as e:
             log_step(f"⚠️ SMOTE failed: {e}")
 
@@ -478,26 +598,34 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
         try:
             if enable_tuning:
                 model = tune_model(model, model_name, task_type, X_train, y_train, tune_cv, log_step)
-                # Collect best params if GridSearchCV was used
+                # Collect best params
                 if hasattr(model, "get_params"):
                     best_params_report[model_name] = {
                         k: v for k, v in model.get_params().items()
                         if k in (PARAM_GRIDS_CLF if task_type == "classification" else PARAM_GRIDS_REG).get(model_name, {})
                     }
             else:
+                log_step(f"Training {model_name} with default params...")
                 model.fit(X_train, y_train)
 
             trained_models[model_name] = model
             y_pred = model.predict(X_test)
             m = calculate_metrics(y_test, y_pred, task_type, model, X_test)
 
+            # Cross-validation only if enabled
             if use_cv:
                 try:
                     scoring_str = "accuracy" if task_type == "classification" else "r2"
-                    cv_sc = cross_val_score(model, X_train, y_train,
-                                            cv=min(cv_folds, 3), scoring=scoring_str)
-                    m["cv_mean"] = cv_sc.mean()
-                    m["cv_std"] = cv_sc.std()
+                    # Use fewer folds for small datasets
+                    actual_folds = min(cv_folds, len(np.unique(y_train)) if task_type == "classification" else cv_folds)
+                    if actual_folds >= 2:
+                        cv_sc = cross_val_score(model, X_train, y_train,
+                                                cv=actual_folds, scoring=scoring_str)
+                        m["cv_mean"] = cv_sc.mean()
+                        m["cv_std"] = cv_sc.std()
+                        log_step(f"CV {actual_folds}-fold: {cv_sc.mean():.4f} ± {cv_sc.std():.4f}")
+                    else:
+                        log_step("⚠️ Skipping CV - not enough samples per class")
                 except Exception as e:
                     log_step(f"⚠️ CV failed for {model_name}: {e}")
 
@@ -505,12 +633,12 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
             log_step(f"✓ {model_name} done")
 
         except Exception as e:
-            log_step(f"❌ {model_name} failed: {e}")
+            log_step(f"❌ {model_name} failed: {str(e)[:100]}")
             continue
 
         with console_ph.container():
             st.markdown("#### 🪵 Training Log")
-            st.code("\n".join(st.session_state.modeling_log[-10:]), language="text")
+            st.code("\n".join(st.session_state.modeling_log[-15:]), language="text")
 
     if metrics_report:
         metric_key = "Accuracy" if task_type == "classification" else "R2 Score"
@@ -530,8 +658,9 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
             st.session_state.modeling_done          = True
             st.session_state.best_params_report     = best_params_report
 
+            # Generate AI summary
             try:
-                with st.spinner("🧠 Generating AI recommendation..."):
+                with st.spinner("🧠 Generating AI model summary..."):
                     rec = generate_ai_recommendation(metrics_report, task_type, features_list,
                                                      len(df_clean), best_model_name)
                     st.session_state.model_recommendation = rec
@@ -540,6 +669,7 @@ def run_training(df, target_col, features_list, task_type, selected_model_names,
 
             log_step(f"🏆 Best: {best_model_name}")
             st.success(f"✅ Done! Best model: **{best_model_name}**")
+            st.balloons()
         else:
             st.error("Best model could not be loaded.")
     else:
@@ -566,12 +696,6 @@ def calculate_metrics(y_test, y_pred, task_type, model, X_test):
     try:
         if hasattr(model, "feature_importances_"):
             m["feature_importances"] = model.feature_importances_.tolist()
-    except Exception:
-        pass
-
-    try:
-        m["y_test"] = list(y_test)[:100]
-        m["y_pred"] = list(y_pred)[:100]
     except Exception:
         pass
 
@@ -654,10 +778,7 @@ def create_feature_importance_chart(feature_importances, features_list, top_n=10
                           coloraxis_showscale=False)
         return fig
     except Exception:
-        return None
-
-
-def create_confusion_matrix_heatmap(cm_matrix):
+        return Nonedef create_confusion_matrix_heatmap(cm_matrix):
     if not cm_matrix:
         return None
     try:
@@ -693,7 +814,6 @@ def display_results(task_type):
                     row[k] = round(v, 4)
             rows.append(row)
         if rows:
-            # Convert to string to avoid Arrow errors
             df_display = pd.DataFrame(rows)
             st.dataframe(df_display, use_container_width=True, hide_index=True)
             st.success(f"💡 **Best Model:** {best_model_name}")
@@ -722,7 +842,6 @@ def display_results(task_type):
             for model_name, params in best_params.items():
                 if params:
                     st.markdown(f"**{model_name}**")
-                    # Convert params to dataframe with string values to avoid Arrow errors
                     param_df = pd.DataFrame(list(params.items()), columns=["Parameter", "Best Value"])
                     param_df["Best Value"] = param_df["Best Value"].astype(str)
                     st.dataframe(param_df, use_container_width=True, hide_index=True)
