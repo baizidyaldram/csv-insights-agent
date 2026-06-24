@@ -210,15 +210,15 @@ def render():
             for col in numeric_cols:
                 if df_clean[col].isnull().any():
                     if fill_missing_numeric == "Median":
-                        df_clean[col].fillna(df_clean[col].median(), inplace=True)
+                        df_clean[col] = df_clean[col].fillna(df_clean[col].median())
                     elif fill_missing_numeric == "Mean":
-                        df_clean[col].fillna(df_clean[col].mean(), inplace=True)
+                        df_clean[col] = df_clean[col].fillna(df_clean[col].mean())
                     elif fill_missing_numeric == "Zero":
-                        df_clean[col].fillna(0, inplace=True)
+                        df_clean[col] = df_clean[col].fillna(0)
                     elif fill_missing_numeric == "Forward Fill":
-                        df_clean[col].fillna(method='ffill', inplace=True)
+                        df_clean[col] = df_clean[col].ffill()
                     elif fill_missing_numeric == "Backward Fill":
-                        df_clean[col].fillna(method='bfill', inplace=True)
+                        df_clean[col] = df_clean[col].bfill()
             
             missing_after = df_clean[numeric_cols].isnull().sum().sum()
             filled = missing_before - missing_after
@@ -235,13 +235,13 @@ def render():
                     if fill_missing_categorical == "Mode (most frequent)":
                         mode_val = df_clean[col].mode()
                         if len(mode_val) > 0:
-                            df_clean[col].fillna(mode_val[0], inplace=True)
+                            df_clean[col] = df_clean[col].fillna(mode_val[0])
                     elif fill_missing_categorical == "Unknown":
-                        df_clean[col].fillna("Unknown", inplace=True)
+                        df_clean[col] = df_clean[col].fillna("Unknown")
                     elif fill_missing_categorical == "Forward Fill":
-                        df_clean[col].fillna(method='ffill', inplace=True)
+                        df_clean[col] = df_clean[col].ffill()
                     elif fill_missing_categorical == "Backward Fill":
-                        df_clean[col].fillna(method='bfill', inplace=True)
+                        df_clean[col] = df_clean[col].bfill()
             
             missing_after = df_clean[cat_cols].isnull().sum().sum()
             filled = missing_before - missing_after
