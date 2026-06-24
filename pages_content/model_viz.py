@@ -56,18 +56,18 @@ def create_model_comparison_chart(metrics_dict: dict, task_type: str):
         barmode="group",
         title=title,
         labels={"value": y_title, "variable": "Metric", "Model": "Algorithm"},
-        color_discrete_sequence=px.colors.sequential.Viridis,
+        color_discrete_sequence=["#EF9F27","#D85A30","#BA7517","#FAC775","#F0997B"],
         text_auto='.3f'
     )
     
     fig.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         height=500,
         hovermode="x unified",
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-        plot_bgcolor="rgba(0,0,0,0.2)",
+        plot_bgcolor="rgba(0,0,0,0)",
         paper_bgcolor="rgba(0,0,0,0)",
-        font=dict(color="#e2e2f0")
+        font=dict(family="Inter, sans-serif", size=12, color="#3D3530")
     )
     
     fig.update_traces(
@@ -117,13 +117,13 @@ def create_radar_chart(metrics_dict: dict, best_model: str):
             radialaxis=dict(
                 visible=True,
                 range=[0, 1],
-                tickfont=dict(color="#e2e2f0")
+                tickfont=dict(family="Inter, sans-serif", size=12, color="#3D3530")
             ),
             angularaxis=dict(
                 tickfont=dict(color="#e2e2f0", size=10)
             )
         ),
-        template="plotly_dark",
+        template="plotly_white",
         height=450,
         title="📈 Multi-Metric Radar Comparison",
         showlegend=True,
@@ -152,15 +152,15 @@ def create_feature_importance_chart(feature_importances: dict, top_n: int = 10):
         title=f"🔑 Top {top_n} Feature Importances",
         labels={"Importance": "Importance Score", "Feature": ""},
         color="Importance",
-        color_continuous_scale="Viridis",
+        color_continuous_scale="YlOrBr",
         text_auto='.3f'
     )
     
     fig.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         height=400,
         yaxis=dict(categoryorder="total ascending"),
-        plot_bgcolor="rgba(0,0,0,0.2)",
+        plot_bgcolor="rgba(0,0,0,0)",
         coloraxis_showscale=False
     )
     
@@ -185,14 +185,14 @@ def create_confusion_matrix_heatmap(cm_matrix, class_names=None):
         labels=dict(x="Predicted", y="Actual", color="Count"),
         x=class_names,
         y=class_names,
-        color_continuous_scale="Blues",
+        color_continuous_scale="YlOrBr",
         aspect="auto"
     )
     
     fig.update_layout(
-        template="plotly_dark",
+        template="plotly_white",
         height=450,
-        plot_bgcolor="rgba(0,0,0,0.2)"
+        plot_bgcolor="rgba(0,0,0,0)"
     )
     
     return fig
