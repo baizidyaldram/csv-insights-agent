@@ -140,15 +140,25 @@ csv-insight-agents/
 ## 📦 Requirements
 
 ```
-streamlit>=1.35
+streamlit
 pandas
 numpy
 plotly
 scikit-learn
-xgboost
 scipy
 openpyxl
-requests
+xgboost
+lightgbm
+optuna
+imbalanced-learn
+shap
+umap-learn
+statsmodels
+category-encoders
+joblib
+tqdm
+psutil
+matplotlib
 ```
 
 ---
